@@ -11,13 +11,33 @@ LOGFILE=froxlor-installer.log
 touch $LOGFILE
 echo "$(date "+%d.%m.%Y %T") : Starting work" >> $LOGFILE 2>&1
 
+# let user choose between nohup or disown
+installMethodeChoice=$1
+installMethode=
+if [ "$installMethodeChoice" = "" ] || [ -z $installMethodeChoice ]; then
+  echo "$0 <disown|nohup>"
+  exit 1
+elif [ "$installMethodeChoice" = "disown" ]; then
+  # installMethode="disown" not yet working
+  installMethode="nohup"
+elif [ "$installMethodeChoice" = "nohup" ]; then
+  installMethode="nohup"
+else
+  echo "$0 <disown|nohup>"
+  exit 1
+fi
+
 # Run a command in the background.
 _evalBg() {
     # no hurry
     sleep 0.2
-    # $@ &>>$LOGFILE & disown --> this might be preferred methode but nohup seems to do the job just as good but more beautiful
-    # eval "nohup $@ & > $LOGFILE 2>&1" &>/dev/null;
-    nohup $@ >>$LOGFILE 2>&1 &
+    if [ "$installMethode" = "disown" ]; then
+      # --> this might be preferred methode but nohup seems to do the job just as good but more beautiful
+      $@ >>$LOGFILE 2>&1 & disown
+    elif [ "$installMethode" = "nohup" ]; then
+      # eval "nohup $@ & > $LOGFILE 2>&1" &>/dev/null;
+      nohup $@ >>$LOGFILE 2>&1 &
+    fi
     stop_spinner $?
     wait
 }
@@ -59,13 +79,13 @@ getPHPversion() {
   v="$(php -v|grep -m 1 --only-matching --perl-regexp "7\.\\d")"
   # https://blog.ueffing.net/post/2012/06/19/php-version-mit-bash-herausfinden/
   v2="$(sLong=`php -v | grep PHP -m 1 | awk '{print $2}'`; echo ${sLong:0:3})"
-  
+
   if [ ! return $v == "" ]; then
     return $v;
   elif [ ! return $v == "" ]; then
     return $v2;
-	else
-	return 1;
+    else
+    return 1;
   fi
 }
 
@@ -74,9 +94,9 @@ getPHPversion() {
 # clear terminal before installation process
 printf "\033c"
 
-echo -e "\e[32m    #####################\e[0m"
-echo -e "\e[32m    # \e[0m\e[42mFroxlor Installer\e[49m\e[32m #\e[0m"
-echo -e "\e[32m    #####################\e[0m"
+echo -e "        \e[32m\e[42m#####################\e[49m\e[0m"
+echo -e "        \e[32m\e[42m#\e[49m\e[0m\e[33m Froxlor Installer \e[32m\e[42m#\e[49m\e[0m"
+echo -e "        \e[32m\e[42m#####################\e[49m\e[0m"
 echo ""
 echo ""
 echo -e "\e[93m--> \e[91mCollecting data first:\e[0m"
@@ -451,7 +471,7 @@ a2dismod userdir
 cat <<EOF > /etc/apache2/conf-enabled/acme.conf
 Alias "/.well-known/acme-challenge" "/var/www/html/.well-known/acme-challenge"
 <Directory "/var/www/html/.well-known/acme-challenge">
-	Require all granted
+    Require all granted
 </Directory>
 EOF
 start_spinner "Restarting apache2"
@@ -493,10 +513,11 @@ echo -e "\e[92mFirst part of installation finished\e[0m"
 echo ""
 echo -e "Continue froxlor install in your web browser:"
 echo -e "    \e[4mhttp://$( wget -qO- ipv4.icanhazip.com )\e[0m"
-if $createFroxlorRootPassword ; then
+if $createFroxlorRootPassword; then
   echo ""
   echo ""
-  echo -e "Froxlor-Password (unprivileged): $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-16};echo;)"
+  froxlorunprivilegedpasswd="$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-16};echo;)"
+  echo -e "Froxlor-Password (unprivileged): $froxlorunprivilegedpasswd"
   echo -e "FroxlorRoot: User=\e[1mfroxlorroot\e[0m Password=\e[1m$froxlorrootpassword\e[0m"
   echo -e "Froxlor-Admin-Password: $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-12};echo;)"
   echo -e "Copy these to the web browser installation process. \e[5mFroxlorRoot-Password is mandatory and case-sensitive!\e[0m"
@@ -507,11 +528,13 @@ echo -e "Keep this information at a save place. We do not save it for you!"
 echo ""
 echo ""
 echo -e "\e[33mOnce completed the web part of installation continue here..\e[0m"
+echo -e "\e[33mDo not try moving files from /tmp or similar as proposed by webinterface. We will do this for you. ;)\e[0m"
 echo "$(date "+%d.%m.%Y %T") : Finished Part 1/2" >> $LOGFILE 2>&1
 
 sleep 2
 
 # wait for user to finish web part of installation to let him continue then here
+echo -e "\e[94m------------------------\e[0m"
 webfinished=false
 while ! $webfinished; do
     read -p "Webinstallation completed so continue here? [Yn]" yn
@@ -522,7 +545,7 @@ while ! $webfinished; do
         * ) echo "Please answer yes or no.";;
     esac
 done
-
+echo -e "\e[94m------------------------\e[0m"
 while [[ $froxlordatabasename = "" ]]; do
    read -e -p 'Froxlor database name (unprivileged): ' -i "froxlor" froxlordatabasename
    if [ -z $froxlordatabasename ] ; then
@@ -531,6 +554,33 @@ while [[ $froxlordatabasename = "" ]]; do
       echo $'\e[32msuccess\e[0m'
    fi
 done
+if [ ! -z $froxlorunprivilegedpasswd ]; then
+  echo -e "\e[94m------------------------\e[0m"
+  while true; do
+      read -p "Should we use auto generated password for froxlor db? [Yn]" yn
+      yn=${yn:-y}
+      case $yn in
+          [Yy]* ) useFroxlorUnprivilegedPasswd=true; break;;
+          [Nn]* ) useFroxlorUnprivilegedPasswd=false; break;;
+          * ) echo "Please answer yes or no.";;
+      esac
+  done
+fi
+froxlorUnprivilegedPassword=
+if [ ! -z $useFroxlorUnprivilegedPasswd ]; then
+  froxlorUnprivilegedPassword=$froxlorunprivilegedpasswd
+else
+  echo -e "\e[94m------------------------\e[0m"
+  while [[ $udbpasswd = "" ]]; do
+     read -sp 'Froxlor db passwword (unprivileged): ' udbpasswd
+     if [ -z $udbpasswd ] ; then
+        echo $'\e[31mfailed\e[0m'
+     else
+        echo $'\e[32msuccess\e[0m'
+        froxlorUnprivilegedPassword=$udbpasswd
+     fi
+  done
+fi
 
 # setting up cron according to froxlor config
 cat <<EOF > /etc/cron.d/froxlor
@@ -550,6 +600,30 @@ chown root:root "/etc/cron.d/froxlor"
 start_spinner "Restarting cron"
 cmd="systemctl restart cron";
 _evalBg "${cmd}";
+
+# setup login file
+froxlorrootName=
+if $createFroxlorRootPassword ; then
+  froxlorrootName="froxlorroot"
+else
+  froxlorrootName="root"
+fi
+cat <<EOF > /var/www/html/lib/userdata.inc.php
+<?php
+// automatically generated userdata.inc.php for Froxlor
+$sql['host']='localhost';
+$sql['user']=$froxlordatabasename;
+$sql['password']=$froxlorUnprivilegedPassword;
+$sql['db']=$froxlordatabasename;
+$sql_root[0]['caption']='Default';
+$sql_root[0]['host']='localhost';
+$sql_root[0]['user']=$froxlorrootName;
+$sql_root[0]['password']=$froxlorrootpassword;
+// enable debugging to browser in case of SQL errors
+$sql['debug'] = false;
+?>
+EOF
+chown froxlorlocal:froxlorlocal /var/www/html/lib/userdata.inc.php
 
 # enable quota in froxlor
 mysql -u root -p$mdbpasswd $froxlordatabasename <<EOF
