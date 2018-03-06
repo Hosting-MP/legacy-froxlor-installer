@@ -19,6 +19,7 @@ if [ "$installMethodeChoice" = "" ] || [ -z $installMethodeChoice ]; then
   exit 1
 elif [ "$installMethodeChoice" = "disown" ]; then
   # installMethode="disown" not yet working
+  echo -e "Switching to nohup as disown is not available yet"
   installMethode="nohup"
 elif [ "$installMethodeChoice" = "nohup" ]; then
   installMethode="nohup"
@@ -38,8 +39,8 @@ _evalBg() {
       # eval "nohup $@ & > $LOGFILE 2>&1" &>/dev/null;
       nohup $@ >>$LOGFILE 2>&1 &
     fi
-    stop_spinner $?
     wait
+    stop_spinner $?
 }
 
 wget -q -O spinner.sh https://raw.githubusercontent.com/tlatsas/bash-spinner/master/spinner.sh
@@ -168,7 +169,7 @@ start_spinner "Installing required components (takes a long time)..."
 cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y apt-utils debconf-utils \
                 dialog apache2-utils mcrypt curl bzip2 zip unzip tar wget git \
                 apache2 php php-fpm php-json php-gd php-imagick imagemagick php-curl php-mcrypt \
-                php-xsl php-yaml php-fileinfo php-uploadprogress php-geoip geoip-database-contrib \
+                php-xsl php-fileinfo php-uploadprogress php-geoip geoip-database-contrib \
                 php-apcu php-bcmath php-dom php-gnupg php-imap php-mailparse php-mbstring \
                 php-memcached php-mysql php-pdo php-pdo-mysql php-sqlite3 sqlite3 \
                 php-pspell spell aspell-de php-phar php-posix php-pear php-tidy \
@@ -251,12 +252,12 @@ _evalBg "${cmd}";
 
 cat <<EOF > /etc/cron.daily/update-froxlor
 #!/bin/bash
-git --git-dir='/var/www/html' pull origin master
+git --git-dir='/var/www/html/.git' pull origin master
 RESULT=$?
 if [ $RESULT -eq 0 ]; then
   exit 0
 else
-  /usr/bin/git --git-dir='/var/www/html' pull origin master
+  /usr/bin/git --git-dir='/var/www/html/.git' pull origin master
   RESULT=$?
   if [ $RESULT -eq 0 ]; then
     exit 0
@@ -292,10 +293,24 @@ cmd="apt-get install -y quota quotatool";
 _evalBg "${cmd}";
 
 
+# get mount point of directory as in fstab
+if [ "$(df -PT "$path" | awk 'NR==2 {print $2}')" = "ext4" ]; then
+  fstabWro="$(df "$path" | tail -1 | awk '{ print $6 }')       ext4    errors=remount-ro"
+  fstabDefaults="$(df "$path" | tail -1 | awk '{ print $6 }')       ext4    defaults"
+  elif [ "$(df -PT "$path" | awk 'NR==2 {print $2}')" = "ext3" ]; then
+    fstabWro="$(df "$path" | tail -1 | awk '{ print $6 }')       ext3    errors=remount-ro"
+    fstabDefaults="$(df "$path" | tail -1 | awk '{ print $6 }')       ext3    defaults"
+  else
+  fstabWro="errors=remount-ro"
+  fstabDefaults="defaults"
+fi
+
+
 # enable quota and check for virtualized environments
 if ! [ -f /proc/user_beancounters ]; then
   if [ `cat /etc/fstab | grep ',usrjquota' | wc -l` -eq 0 ] || [ `cat /etc/fstab | grep ',grpjquota' | wc -l` -eq 0 ] || [ `cat /etc/fstab | grep ',usrquota' | wc -l` -eq 0 ] || [ `cat /etc/fstab | grep ',grpquota' | wc -l` -eq 0 ]; then
-    sed -i 's/errors=remount-ro/errors=remount-ro,usrquota,grpquota/g' /etc/fstab
+    sed -i 's/'"$fstabWro"'/'"$fstab"',usrquota,grpquota/g' /etc/fstab
+	sed -i 's/'"$fstabDefaults"'/'"$fstabDefaults"',usrquota,grpquota/g' /etc/fstab
     start_spinner "Remounting filesystem to enable quota"
     cmd="mount -o remount /"
     _evalBg "${cmd}"
@@ -303,15 +318,16 @@ if ! [ -f /proc/user_beancounters ]; then
       if [ -f /aquota.user ]; then
         touch /aquota.user
         chmod 600 /aquota.user
-        if [ -f /aquota.group ]; then
-          touch /aquota.group
-          chmod 600 /aquota.group
-        fi
+      fi
+      if [ -f /aquota.group ]; then
+        touch /aquota.group
+        chmod 600 /aquota.group
       fi
       quotaon -aug
       elif [ "$(grep -i QFMT_V2 /boot/config-`uname -r`)" == "CONFIG_QFMT_V2=y" ] || [ "$(grep -i QFMT_V2 /boot/config-`uname -r`)" == "CONFIG_QFMT_V2=m" ]; then
         if quotacheck -F vfsv1 -acugm; then
-          sed -i 's/errors=remount-ro,usrquota,grpquota/usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv1/g' /etc/fstab
+          sed -i 's/errors=remount-ro,usrquota,grpquota/errors=remount-ro,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv1/g' /etc/fstab
+		  sed -i 's/defaults,usrquota,grpquota/defaults,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv1/g' /etc/fstab
           modprobe quota_v1
           modprobe quota_v2
           start_spinner "Remounting filesystem to enable journaled quota"
@@ -320,7 +336,8 @@ if ! [ -f /proc/user_beancounters ]; then
           quotacheck -F vfsv1 -acugmf
           quotaon -F vfsv1 -aug
           elif quotacheck -F vfsv0 -acugm; then
-            sed -i 's/errors=remount-ro,usrquota,grpquota/usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv0/g' /etc/fstab
+            sed -i 's/errors=remount-ro,usrquota,grpquota/errors=remount-ro,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv0/g' /etc/fstab
+			sed -i 's/defaults,usrquota,grpquota/defaults,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv0/g' /etc/fstab
             modprobe quota_v1
             modprobe quota_v2
             start_spinner "Remounting filesystem to enable journaled quota"
@@ -336,6 +353,11 @@ if ! [ -f /proc/user_beancounters ]; then
               quotaoff -af
               # removing applied quota tags
               sed -i 's/errors=remount-ro,usrquota,grpquota/errors=remount-ro/g' /etc/fstab
+			  sed -i 's/errors=remount-ro,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv1/errors=remount-ro/g' /etc/fstab
+			  sed -i 's/errors=remount-ro,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv0/errors=remount-ro/g' /etc/fstab
+			  sed -i 's/defaults,usrquota,grpquota/defaults/g' /etc/fstab
+			  sed -i 's/defaults,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv1/defaults/g' /etc/fstab
+			  sed -i 's/defaults,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv0/defaults/g' /etc/fstab
               echo -e "Enabling quotas \e[31mfailed\e[0m (already enabled?)"
               start_spinner "Remounting filesystem to disable journaled quota"
               cmd="mount -o remount /"
@@ -656,6 +678,8 @@ mysql -u root -p$mdbpasswd $froxlordatabasename <<EOF
 UPDATE panel_settings SET value = '1' WHERE panel_settings.settingid = 75;
 EOF
 fi
+
+php /var/www/html/scripts/froxlor_master_cronjob.php --force
 
 echo ""
 echo -e "\e[92mInstallation finished\e[0m"
