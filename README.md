@@ -1,5 +1,6 @@
 # froxlor-installer
-Bash install script to install latest version of froxlor including all required system components.
+Bash install script to install latest version of froxlor including all required system components.  
+This script should be used on new, clean, minimal installation only. As of now, only recent Debian/Ubuntu distributions are supported. Script cleanup and unattented install mode will be added soon.
 
 ## Installation
 Login to your machine, open terminal (**ssh/shell**) and run the following command **as root**:  
