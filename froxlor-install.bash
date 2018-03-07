@@ -9,14 +9,15 @@ fi
 # Starting logger
 LOGFILE=froxlor-installer.log
 touch $LOGFILE
-echo "$(date "+%d.%m.%Y %T") : Starting work" >> $LOGFILE 2>&1
+echo "$(date "+%d.%m.%Y %T") : Starting work" > $LOGFILE 2>&1
 
 # let user choose between nohup or disown
 installMethodeChoice=$1
 installMethode=
 if [ "$installMethodeChoice" = "" ] || [ -z $installMethodeChoice ]; then
-  echo "$0 <disown|nohup>"
-  exit 1
+  #echo "$0 <disown|nohup>"
+  #exit 1
+  installMethode="nohup"
 elif [ "$installMethodeChoice" = "disown" ]; then
   # installMethode="disown" not yet working
   echo -e "Switching to nohup as disown is not available yet"
@@ -75,20 +76,17 @@ isVM() {
   fi
 }
 
-getPHPversion() {
-  # https://gist.github.com/SpekkoRice/694e4e33ee298361b642
-  v="$(php -v|grep -m 1 --only-matching --perl-regexp "7\.\\d")"
-  # https://blog.ueffing.net/post/2012/06/19/php-version-mit-bash-herausfinden/
-  v2="$(sLong=`php -v | grep PHP -m 1 | awk '{print $2}'`; echo ${sLong:0:3})"
-
-  if [ ! return $v == "" ]; then
-    return $v;
-  elif [ ! return $v == "" ]; then
-    return $v2;
-    else
-    return 1;
-  fi
-}
+# https://gist.github.com/SpekkoRice/694e4e33ee298361b642
+v="$(php -v|grep -m 1 --only-matching --perl-regexp "7\.\\d")"
+# https://blog.ueffing.net/post/2012/06/19/php-version-mit-bash-herausfinden/
+v2="$(sLong=`php -v | grep PHP -m 1 | awk '{print $2}'`; echo ${sLong:0:3})"
+if [ ! $v == "" ]; then
+  PHPv=$v;
+elif [ ! $v2 == "" ]; then
+  PHPv=$v2;
+else   
+  return 1;
+fi
 
 ######### Collecting data and asking user ##########
 
@@ -166,7 +164,8 @@ _evalBg "${cmd}";
 #echo -e "System updated \e[32msuccessfully\e[0m"
 
 start_spinner "Installing required components (takes a long time)..."
-cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y apt-utils debconf-utils \
+# for now they are the same but ubuntu is likely to update more recently
+INSTALL_PKGsDEBIAN="apt-utils debconf-utils clamav clamav-daemon \
                 dialog apache2-utils mcrypt curl bzip2 zip unzip tar wget git \
                 apache2 php php-fpm php-json php-gd php-imagick imagemagick php-curl php-mcrypt \
                 php-xsl php-fileinfo php-uploadprogress php-geoip geoip-database-contrib \
@@ -174,8 +173,38 @@ cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y apt-utils debconf-ut
                 php-memcached php-mysql php-pdo php-pdo-mysql php-sqlite3 sqlite3 \
                 php-pspell spell aspell-de php-phar php-posix php-pear php-tidy \
                 php-yaml php-zip php-intl php-memcache php-xmlrpc rkhunter \
-                nscd libnss-extrausers apache2-suexec-pristine bind9 logrotate awstats \
-                clamav clamav-daemon";
+                nscd libnss-extrausers apache2-suexec-pristine bind9 logrotate awstats"
+INSTALL_PKGsUBUNTU="apt-utils debconf-utils clamav clamav-daemon \
+                dialog apache2-utils mcrypt curl bzip2 zip unzip tar wget git \
+                apache2 php php-fpm php-json php-gd php-imagick imagemagick php-curl php-mcrypt \
+                php-xsl php-fileinfo php-uploadprogress php-geoip geoip-database-contrib \
+                php-apcu php-bcmath php-dom php-gnupg php-imap php-mailparse php-mbstring \
+                php-memcached php-mysql php-pdo php-pdo-mysql php-sqlite3 sqlite3 \
+                php-pspell spell aspell-de php-phar php-posix php-pear php-tidy \
+                php-yaml php-zip php-intl php-memcache php-xmlrpc rkhunter \
+                nscd libnss-extrausers apache2-suexec-pristine bind9 logrotate awstats"
+# if [ "`lsb_release -is`" = "Debian" ]; then
+  # for i in $INSTALL_PKGsDEBIAN; do
+    # cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $i";
+    # _evalBg "${cmd}";
+  # done
+# elif [ "`lsb_release -is`" = "Ubuntu" ]; then
+  # for i in $INSTALL_PKGsUBUNTU; do
+    # cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $i";
+    # _evalBg "${cmd}";
+  # done
+# else
+  # echo "Unsupported Operating System";
+# fi
+cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y apt-utils debconf-utils clamav clamav-daemon \
+                dialog apache2-utils mcrypt curl bzip2 zip unzip tar wget git \
+                apache2 php php-fpm php-json php-gd php-imagick imagemagick php-curl php-mcrypt \
+                php-xsl php-fileinfo php-uploadprogress php-geoip geoip-database-contrib \
+                php-apcu php-bcmath php-dom php-gnupg php-imap php-mailparse php-mbstring \
+                php-memcached php-mysql php-pdo php-pdo-mysql php-sqlite3 sqlite3 \
+                php-pspell spell aspell-de php-phar php-posix php-pear php-tidy \
+                php-yaml php-zip php-intl php-memcache php-xmlrpc rkhunter \
+                nscd libnss-extrausers apache2-suexec-pristine bind9 logrotate awstats";
 _evalBg "${cmd}";
 
 #echo -e "Components installed \e[32msuccessfully\e[0m"
@@ -185,11 +214,11 @@ phpenmod pdo_mysql
 phpenmod pdo_sqlite
 
 start_spinner "Restarting PHP fpm"
-cmd="systemctl restart php7.0-fpm";
+cmd="systemctl restart php$PHPv-fpm";
 _evalBg "${cmd}";
 
 start_spinner "Making PHP fpm start on boot"
-cmd="systemctl enable php7.0-fpm";
+cmd="systemctl enable php$PHPv-fpm";
 _evalBg "${cmd}";
 
 start_spinner "Enable apache2 modules"
@@ -197,7 +226,7 @@ cmd="a2enmod rewrite ssl proxy_fcgi setenvif actions headers suexec";
 _evalBg "${cmd}";
 
 start_spinner "Enable PHP fpm for apache2"
-cmd="a2enconf php7.0-fpm";
+cmd="a2enconf php$PHPv-fpm";
 _evalBg "${cmd}";
 
 start_spinner "Restarting apache2"
@@ -206,12 +235,22 @@ _evalBg "${cmd}";
 
 #echo -e "Enabled components \e[32msuccessfully\e[0m"
 
-export DEBIAN_FRONTEND="noninteractive"
-debconf-set-selections <<< "mariadb-server mysql-server/root_password password $mdbpasswd"
-debconf-set-selections <<< "mariadb-server mysql-server/root_password_again password $mdbpasswd"
-start_spinner "Installing database server..."
-cmd="apt-get install -y mariadb-server";
-_evalBg "${cmd}";
+# export DEBIAN_FRONTEND="noninteractive"
+if [ "`lsb_release -is`" = "Debian" ]; then
+  debconf-set-selections <<< "mariadb-server mysql-server/root_password password $mdbpasswd"
+  debconf-set-selections <<< "mariadb-server mysql-server/root_password_again password $mdbpasswd"
+  start_spinner "Installing database server..."
+  cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y mariadb-server";
+  _evalBg "${cmd}";
+elif [ "`lsb_release -is`" = "Ubuntu" ]; then
+  debconf-set-selections <<< "mysql-server mysql-server/root_password password $mdbpasswd"
+  debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $mdbpasswd"
+  start_spinner "Installing database server..."
+  cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server";
+  _evalBg "${cmd}";
+else
+  echo "Unsupported Operating System";
+fi
 
 #echo -e "Installed database-server \e[32msuccessfully\e[0m"
 
@@ -235,13 +274,14 @@ EOF
 fi
 
 # export DEBIAN_FRONTEND="noninteractive"
-# APP_PASS="your-app-pwd"
-# echo "phpmyadmin phpmyadmin/dbconfig-install boolean true" | debconf-set-selections
+echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2" | debconf-set-selections
+echo "phpmyadmin phpmyadmin/dbconfig-install boolean false" | debconf-set-selections
+echo "phpmyadmin phpmyadmin/dbconfig-upgrade boolean false" | debconf-set-selections
 # echo "phpmyadmin phpmyadmin/mysql/app-pass password $APP_PASS" | debconf-set-selections
 # echo "phpmyadmin phpmyadmin/app-password-confirm password $APP_PASS" | debconf-set-selections
-# echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2" | debconf-set-selections
-
-# apt-get install -y phpmyadmin
+start_spinner "Installing phpmyadmin..."
+cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y phpmyadmin";
+_evalBg "${cmd}";
 
 if [ -f /var/www/html/index.html ]; then
     rm /var/www/html/index.html
@@ -294,12 +334,12 @@ _evalBg "${cmd}";
 
 
 # get mount point of directory as in fstab
-if [ "$(df -PT "$path" | awk 'NR==2 {print $2}')" = "ext4" ]; then
-  fstabWro="$(df "$path" | tail -1 | awk '{ print $6 }')       ext4    errors=remount-ro"
-  fstabDefaults="$(df "$path" | tail -1 | awk '{ print $6 }')       ext4    defaults"
-  elif [ "$(df -PT "$path" | awk 'NR==2 {print $2}')" = "ext3" ]; then
-    fstabWro="$(df "$path" | tail -1 | awk '{ print $6 }')       ext3    errors=remount-ro"
-    fstabDefaults="$(df "$path" | tail -1 | awk '{ print $6 }')       ext3    defaults"
+if [ "$(df -PT "/var/www/html" | awk 'NR==2 {print $2}')" = "ext4" ]; then
+  fstabWro="$(df "/var/www/html" | tail -1 | awk '{ print $6 }')       ext4    errors=remount-ro"
+  fstabDefaults="$(df "/var/www/html" | tail -1 | awk '{ print $6 }')       ext4    defaults"
+  elif [ "$(df -PT "/var/www/html" | awk 'NR==2 {print $2}')" = "ext3" ]; then
+    fstabWro="$(df "/var/www/html" | tail -1 | awk '{ print $6 }')       ext3    errors=remount-ro"
+    fstabDefaults="$(df "/var/www/html" | tail -1 | awk '{ print $6 }')       ext3    defaults"
   else
   fstabWro="errors=remount-ro"
   fstabDefaults="defaults"
@@ -309,7 +349,7 @@ fi
 # enable quota and check for virtualized environments
 if ! [ -f /proc/user_beancounters ]; then
   if [ `cat /etc/fstab | grep ',usrjquota' | wc -l` -eq 0 ] || [ `cat /etc/fstab | grep ',grpjquota' | wc -l` -eq 0 ] || [ `cat /etc/fstab | grep ',usrquota' | wc -l` -eq 0 ] || [ `cat /etc/fstab | grep ',grpquota' | wc -l` -eq 0 ]; then
-    sed -i 's/'"$fstabWro"'/'"$fstab"',usrquota,grpquota/g' /etc/fstab
+    sed -i 's/'"$fstabWro"'/'"$fstabWro"',usrquota,grpquota/g' /etc/fstab
 	sed -i 's/'"$fstabDefaults"'/'"$fstabDefaults"',usrquota,grpquota/g' /etc/fstab
     start_spinner "Remounting filesystem to enable quota"
     cmd="mount -o remount /"
@@ -384,26 +424,26 @@ cmd="tar -C tmp-icl -xzf ioncube_loaders_lin_x86-64.tar.gz";
 _evalBg "${cmd}";
 # how to get the php extension directory??
 if ifDirExists "/usr/lib/php/20151012"; then
-  cp tmp-icl/ioncube/ioncube_loader_lin_7.0.so /usr/lib/php/20151012
+  cp "tmp-icl/ioncube/ioncube_loader_lin_${PHPv}.so" "/usr/lib/php/20151012"
   else
   logError "ioncube loaders, php extention directory at wrong place"
 fi
-touch /etc/php/7.0/fpm/conf.d/00-ioncube.ini
-chmod 0777 /etc/php/7.0/fpm/conf.d/00-ioncube.ini
-chown root:root /etc/php/7.0/fpm/conf.d/00-ioncube.ini
-cat <<EOF > /etc/php/7.0/fpm/conf.d/00-ioncube.ini
-zend_extension = "/usr/lib/php/20151012/ioncube_loader_lin_7.0.so"
+touch "/etc/php/${PHPv}/fpm/conf.d/00-ioncube.ini"
+chmod 0777 "/etc/php/${PHPv}/fpm/conf.d/00-ioncube.ini"
+chown root:root "/etc/php/${PHPv}/fpm/conf.d/00-ioncube.ini"
+cat <<EOF > "/etc/php/${PHPv}/fpm/conf.d/00-ioncube.ini"
+zend_extension = "/usr/lib/php/20151012/ioncube_loader_lin_${PHPv}.so"
 EOF
 rm ioncube_loaders_lin_x86-64.tar.gz
 rm -R tmp-icl
 start_spinner "Disable mod php for apache2"
-cmd="a2dismod php7.0";
+cmd="a2dismod php$PHPv";
 _evalBg "${cmd}";
 start_spinner "Restarting apache2"
 cmd="systemctl restart apache2";
 _evalBg "${cmd}";
 start_spinner "Restarting PHP fpm"
-cmd="systemctl restart php7.0-fpm";
+cmd="systemctl restart php$PHPv-fpm";
 _evalBg "${cmd}";
 
 #echo -e "Added ioncubeloader \e[32msuccessfully\e[0m"
@@ -530,6 +570,7 @@ sed -i.bak 's/^DirData/# DirData/' /etc/awstats//awstats.model.conf
 sed -i.bak 's|^\\(DirIcons=\\).*$|\\1\\"/awstats-icon\\"|' /etc/awstats//awstats.model.conf
 rm /etc/cron.d/awstats
 
+printf "\033c"
 echo ""
 echo -e "\e[92mFirst part of installation finished\e[0m"
 echo ""
@@ -629,20 +670,21 @@ if $createFroxlorRootPassword ; then
   froxlorrootName="froxlorroot"
 else
   froxlorrootName="root"
+  froxlorrootpassword=$mdbpasswd
 fi
 cat <<EOF > /var/www/html/lib/userdata.inc.php
 <?php
 // automatically generated userdata.inc.php for Froxlor
-$sql['host']='localhost';
-$sql['user']=$froxlordatabasename;
-$sql['password']=$froxlorUnprivilegedPassword;
-$sql['db']=$froxlordatabasename;
-$sql_root[0]['caption']='Default';
-$sql_root[0]['host']='localhost';
-$sql_root[0]['user']=$froxlorrootName;
-$sql_root[0]['password']=$froxlorrootpassword;
+\$sql['host']='localhost';
+\$sql['user']='$froxlordatabasename';
+\$sql['password']='$froxlorUnprivilegedPassword';
+\$sql['db']='$froxlordatabasename';
+\$sql_root[0]['caption']='Default';
+\$sql_root[0]['host']='localhost';
+\$sql_root[0]['user']='$froxlorrootName';
+\$sql_root[0]['password']='$froxlorrootpassword';
 // enable debugging to browser in case of SQL errors
-$sql['debug'] = false;
+\$sql['debug'] = false;
 ?>
 EOF
 chown froxlorlocal:froxlorlocal /var/www/html/lib/userdata.inc.php
@@ -672,6 +714,11 @@ UPDATE panel_settings SET value = '1' WHERE panel_settings.settingid = 139;
 UPDATE panel_settings SET value = '1' WHERE panel_settings.settingid = 179;
 EOF
 
+# set phpmyadmin url in froxlor
+mysql -u root -p$mdbpasswd $froxlordatabasename <<EOF
+UPDATE panel_settings SET value = 'http://$( wget -qO- ipv4.icanhazip.com )/phpmyadmin' WHERE panel_settings.settingid = 217;
+EOF
+
 # if it is Debian 9 or Ubuntu 16.04 - 18.04 enable mod_proxy_fcgi
 if [ "$(cat /etc/os-release | grep "VERSION_ID")" == "VERSION_ID=\"9\"" ] || [ "$(cat /etc/os-release | grep "VERSION_ID")" == "VERSION_ID=\"17.10\"" ] || [ "$(cat /etc/os-release | grep "VERSION_ID")" == "VERSION_ID=\"16.04\"" ] || [ "$(cat /etc/os-release | grep "VERSION_ID")" == "VERSION_ID=\"18.04\"" ]; then
 mysql -u root -p$mdbpasswd $froxlordatabasename <<EOF
@@ -679,15 +726,18 @@ UPDATE panel_settings SET value = '1' WHERE panel_settings.settingid = 75;
 EOF
 fi
 
-php /var/www/html/scripts/froxlor_master_cronjob.php --force
+if [ -f /var/www/html/lib/userdata.inc.php ]; then
+    php /var/www/html/scripts/froxlor_master_cronjob.php --force
+fi
 
+printf "\033c"
 echo ""
 echo -e "\e[92mInstallation finished\e[0m"
 echo ""
 echo -e "You may want to 'rebuild config files' in froxlor web."
 echo ""
 echo ""
-echo -e "Do not forget to run mysql_secure_installation"
+echo -e "\e[31mDo not forget to run mysql_secure_installation\e[0m"
 echo ""
 echo "$(date "+%d.%m.%Y %T") : Finished Part 2/2" >> $LOGFILE 2>&1
 echo "$(date "+%d.%m.%Y %T") : Finished Part" >> $LOGFILE 2>&1
