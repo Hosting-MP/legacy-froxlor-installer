@@ -76,18 +76,6 @@ isVM() {
   fi
 }
 
-# https://gist.github.com/SpekkoRice/694e4e33ee298361b642
-v="$(php -v|grep -m 1 --only-matching --perl-regexp "7\.\\d")"
-# https://blog.ueffing.net/post/2012/06/19/php-version-mit-bash-herausfinden/
-v2="$(sLong=`php -v | grep PHP -m 1 | awk '{print $2}'`; echo ${sLong:0:3})"
-if [ ! $v == "" ]; then
-  PHPv=$v;
-elif [ ! $v2 == "" ]; then
-  PHPv=$v2;
-else   
-  return 1;
-fi
-
 ######### Collecting data and asking user ##########
 
 # clear terminal before installation process
@@ -208,6 +196,19 @@ cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y apt-utils debconf-ut
 _evalBg "${cmd}";
 
 #echo -e "Components installed \e[32msuccessfully\e[0m"
+
+# https://gist.github.com/SpekkoRice/694e4e33ee298361b642
+v="$(php -v|grep -m 1 --only-matching --perl-regexp "7\.\\d")"
+# https://blog.ueffing.net/post/2012/06/19/php-version-mit-bash-herausfinden/
+v2="$(sLong=`php -v | grep PHP -m 1 | awk '{print $2}'`; echo ${sLong:0:3})"
+if [ ! $v == "" ]; then
+  PHPv=$v;
+elif [ ! $v2 == "" ]; then
+  PHPv=$v2;
+else
+  echo "\e[31mFailed\e[0m to fetch php, not installed?"
+  exit 1
+fi
 
 phpenmod pdo
 phpenmod pdo_mysql
