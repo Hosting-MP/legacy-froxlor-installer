@@ -351,7 +351,7 @@ fi
 if ! [ -f /proc/user_beancounters ]; then
   if [ `cat /etc/fstab | grep ',usrjquota' | wc -l` -eq 0 ] || [ `cat /etc/fstab | grep ',grpjquota' | wc -l` -eq 0 ] || [ `cat /etc/fstab | grep ',usrquota' | wc -l` -eq 0 ] || [ `cat /etc/fstab | grep ',grpquota' | wc -l` -eq 0 ]; then
     sed -i 's/'"$fstabWro"'/'"$fstabWro"',usrquota,grpquota/g' /etc/fstab
-	sed -i 's/'"$fstabDefaults"'/'"$fstabDefaults"',usrquota,grpquota/g' /etc/fstab
+    sed -i 's/'"$fstabDefaults"'/'"$fstabDefaults"',usrquota,grpquota/g' /etc/fstab
     start_spinner "Remounting filesystem to enable quota"
     cmd="mount -o remount /"
     _evalBg "${cmd}"
@@ -368,7 +368,7 @@ if ! [ -f /proc/user_beancounters ]; then
       elif [ "$(grep -i QFMT_V2 /boot/config-`uname -r`)" == "CONFIG_QFMT_V2=y" ] || [ "$(grep -i QFMT_V2 /boot/config-`uname -r`)" == "CONFIG_QFMT_V2=m" ]; then
         if quotacheck -F vfsv1 -acugm; then
           sed -i 's/errors=remount-ro,usrquota,grpquota/errors=remount-ro,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv1/g' /etc/fstab
-		  sed -i 's/defaults,usrquota,grpquota/defaults,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv1/g' /etc/fstab
+          sed -i 's/defaults,usrquota,grpquota/defaults,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv1/g' /etc/fstab
           modprobe quota_v1
           modprobe quota_v2
           start_spinner "Remounting filesystem to enable journaled quota"
@@ -378,7 +378,7 @@ if ! [ -f /proc/user_beancounters ]; then
           quotaon -F vfsv1 -aug
           elif quotacheck -F vfsv0 -acugm; then
             sed -i 's/errors=remount-ro,usrquota,grpquota/errors=remount-ro,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv0/g' /etc/fstab
-			sed -i 's/defaults,usrquota,grpquota/defaults,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv0/g' /etc/fstab
+            sed -i 's/defaults,usrquota,grpquota/defaults,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv0/g' /etc/fstab
             modprobe quota_v1
             modprobe quota_v2
             start_spinner "Remounting filesystem to enable journaled quota"
@@ -394,11 +394,11 @@ if ! [ -f /proc/user_beancounters ]; then
               quotaoff -af
               # removing applied quota tags
               sed -i 's/errors=remount-ro,usrquota,grpquota/errors=remount-ro/g' /etc/fstab
-			  sed -i 's/errors=remount-ro,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv1/errors=remount-ro/g' /etc/fstab
-			  sed -i 's/errors=remount-ro,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv0/errors=remount-ro/g' /etc/fstab
-			  sed -i 's/defaults,usrquota,grpquota/defaults/g' /etc/fstab
-			  sed -i 's/defaults,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv1/defaults/g' /etc/fstab
-			  sed -i 's/defaults,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv0/defaults/g' /etc/fstab
+              sed -i 's/errors=remount-ro,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv1/errors=remount-ro/g' /etc/fstab
+              sed -i 's/errors=remount-ro,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv0/errors=remount-ro/g' /etc/fstab
+              sed -i 's/defaults,usrquota,grpquota/defaults/g' /etc/fstab
+              sed -i 's/defaults,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv1/defaults/g' /etc/fstab
+              sed -i 's/defaults,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv0/defaults/g' /etc/fstab
               echo -e "Enabling quotas \e[31mfailed\e[0m (already enabled?)"
               start_spinner "Remounting filesystem to disable journaled quota"
               cmd="mount -o remount /"
@@ -720,10 +720,11 @@ mysql -u root -p$mdbpasswd $froxlordatabasename <<EOF
 UPDATE panel_settings SET value = 'http://$( wget -qO- ipv4.icanhazip.com )/phpmyadmin' WHERE panel_settings.settingid = 217;
 EOF
 
-# if it is Debian 9 or Ubuntu 16.04 - 18.04 enable mod_proxy_fcgi
+# if it is Debian 9 or Ubuntu 16.04 - 18.04 enable mod_proxy_fcgi and libnss-extrausers
 if [ "$(cat /etc/os-release | grep "VERSION_ID")" == "VERSION_ID=\"9\"" ] || [ "$(cat /etc/os-release | grep "VERSION_ID")" == "VERSION_ID=\"17.10\"" ] || [ "$(cat /etc/os-release | grep "VERSION_ID")" == "VERSION_ID=\"16.04\"" ] || [ "$(cat /etc/os-release | grep "VERSION_ID")" == "VERSION_ID=\"18.04\"" ]; then
 mysql -u root -p$mdbpasswd $froxlordatabasename <<EOF
 UPDATE panel_settings SET value = '1' WHERE panel_settings.settingid = 75;
+UPDATE panel_settings SET value = '1' WHERE panel_settings.settingid = 212;
 EOF
 fi
 
