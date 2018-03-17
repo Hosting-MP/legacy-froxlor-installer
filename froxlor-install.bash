@@ -11,6 +11,14 @@ LOGFILE=froxlor-installer.log
 touch $LOGFILE
 echo "$(date "+%d.%m.%Y %T") : Starting work" > $LOGFILE 2>&1
 
+
+
+# download spinner class which makes the installation process more visual
+wget -q -O spinner.sh https://raw.githubusercontent.com/tlatsas/bash-spinner/master/spinner.sh
+source "spinner.sh"
+
+
+
 # let user choose between nohup or disown
 installMethodeChoice=$1
 installMethode=
@@ -25,9 +33,12 @@ elif [ "$installMethodeChoice" = "disown" ]; then
 elif [ "$installMethodeChoice" = "nohup" ]; then
   installMethode="nohup"
 else
+  echo -e "\e[31mError executing command. Use:\e[0m"
   echo "$0 <disown|nohup>"
   exit 1
 fi
+
+
 
 # Run a command in the background.
 _evalBg() {
@@ -44,9 +55,9 @@ _evalBg() {
     stop_spinner $?
 }
 
-wget -q -O spinner.sh https://raw.githubusercontent.com/tlatsas/bash-spinner/master/spinner.sh
-source "spinner.sh"
 
+
+# Check if a directory exists
 ifDirExists() {
 LINK_OR_DIR=$1
 if [ -d $LINK_OR_DIR ]; then
@@ -64,23 +75,35 @@ if [ -d $LINK_OR_DIR ]; then
 fi
 }
 
+
+
+# append errors to the install log
 logError() {
   ERROR_msg=$1
   echo -e "\e[31mError during installation:\e[0m $ERROR_msg"
   echo "$(date "+%d.%m.%Y %T") : Error during installation: $ERROR_msg" >> $LOGFILE 2>&1
 }
 
+
+
+# check whether this is a virtual machine (tested for KVM/XEN but not yet for VMware and oVZ/LXC)
 isVM() {
   if [ "$(hostnamectl | grep Chassis)" == "           Chassis: vm" ]; then
     return 0
   fi
 }
 
-######### Collecting data and asking user ##########
+
+
+
+
+############## Collecting data and asking user ###############
 
 # clear terminal before installation process
 printf "\033c"
 
+
+# Installer header
 echo -e "        \e[32m\e[42m#####################\e[49m\e[0m"
 echo -e "        \e[32m\e[42m#\e[49m\e[0m\e[33m Froxlor Installer \e[32m\e[42m#\e[49m\e[0m"
 echo -e "        \e[32m\e[42m#####################\e[49m\e[0m"
@@ -89,6 +112,9 @@ echo ""
 echo -e "\e[93m--> \e[91mCollecting data first:\e[0m"
 echo ""
 echo ""
+
+
+# Asking for user data
 echo -e "\e[94m------------------------\e[0m"
 while [[ $mdbpasswd = "" ]]; do
    read -sp 'Database root password: ' mdbpasswd
@@ -128,19 +154,39 @@ while true; do
     esac
 done
 echo -e "\e[94m------------------------\e[0m"
+while true; do
+    read -p "Update froxlor automatically (might break your system; DEV)? [yN]" yn
+    yn=${yn:-n}
+    case $yn in
+        [Yy]* ) dailyUpdateFroxlor=true; break;;
+        [Nn]* ) dailyUpdateFroxlor=false; break;;
+        * ) echo "Please answer yes or no.";;
+    esac
+done
+echo -e "\e[94m------------------------\e[0m"
 
 dpkg-reconfigure tzdata
+
+
+
 
 ######### Starting actual install process ##########
 
 echo -e "\e[93m--> \e[91mStarting the installation process!\e[0m"
 echo ""
 
+
+
+# set hostname to previously gathered value
 hostnamectl set-hostname $hostname
 
+
+
+# Updating system to make sure we do not install old software
 start_spinner "Updating repos..."
 cmd="apt-get update";
 _evalBg "${cmd}";
+# waiting as it sometimes takes a second to apply changes on mirrorfile
 sleep 1
 start_spinner "Updating packages..."
 cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade";
@@ -149,10 +195,10 @@ start_spinner "Updating system..."
 cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade";
 _evalBg "${cmd}";
 
-#echo -e "System updated \e[32msuccessfully\e[0m"
+
 
 start_spinner "Installing required components (takes a long time)..."
-# for now they are the same but ubuntu is likely to update more recently
+# for now they are the same but Ubuntu is likely to be updated more recently
 INSTALL_PKGsDEBIAN="apt-utils debconf-utils clamav clamav-daemon \
                 dialog apache2-utils mcrypt curl bzip2 zip unzip tar wget git \
                 apache2 php php-fpm php-json php-gd php-imagick imagemagick php-curl php-mcrypt \
@@ -171,6 +217,7 @@ INSTALL_PKGsUBUNTU="apt-utils debconf-utils clamav clamav-daemon \
                 php-pspell spell aspell-de php-phar php-posix php-pear php-tidy \
                 php-yaml php-zip php-intl php-memcache php-xmlrpc rkhunter \
                 nscd libnss-extrausers apache2-suexec-pristine bind9 logrotate awstats"
+### This procedure takes ages so not use it now ###
 # if [ "`lsb_release -is`" = "Debian" ]; then
   # for i in $INSTALL_PKGsDEBIAN; do
     # cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $i";
@@ -195,12 +242,14 @@ cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y apt-utils debconf-ut
                 nscd libnss-extrausers apache2-suexec-pristine bind9 logrotate awstats";
 _evalBg "${cmd}";
 
-#echo -e "Components installed \e[32msuccessfully\e[0m"
+
 
 # https://gist.github.com/SpekkoRice/694e4e33ee298361b642
 v="$(php -v|grep -m 1 --only-matching --perl-regexp "7\.\\d")"
 # https://blog.ueffing.net/post/2012/06/19/php-version-mit-bash-herausfinden/
 v2="$(sLong=`php -v | grep PHP -m 1 | awk '{print $2}'`; echo ${sLong:0:3})"
+
+# check if php has been installed successfully and if so which version
 if [ ! $v == "" ]; then
   PHPv=$v;
 elif [ ! $v2 == "" ]; then
@@ -210,6 +259,9 @@ else
   exit 1
 fi
 
+
+
+# This does not generate any output usually so run it directly
 phpenmod pdo
 phpenmod pdo_mysql
 phpenmod pdo_sqlite
@@ -234,7 +286,7 @@ start_spinner "Restarting apache2"
 cmd="systemctl restart apache2";
 _evalBg "${cmd}";
 
-#echo -e "Enabled components \e[32msuccessfully\e[0m"
+
 
 # export DEBIAN_FRONTEND="noninteractive"
 if [ "`lsb_release -is`" = "Debian" ]; then
@@ -253,7 +305,7 @@ else
   echo "Unsupported Operating System";
 fi
 
-#echo -e "Installed database-server \e[32msuccessfully\e[0m"
+
 
 if $createFroxlorRootPassword ; then
   # Generate froxlorroot password
@@ -274,7 +326,8 @@ EOF
   echo -e "Enabled DB \e[32msuccessfully\e[0m for root"
 fi
 
-# export DEBIAN_FRONTEND="noninteractive"
+
+
 echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2" | debconf-set-selections
 echo "phpmyadmin phpmyadmin/dbconfig-install boolean false" | debconf-set-selections
 echo "phpmyadmin phpmyadmin/dbconfig-upgrade boolean false" | debconf-set-selections
@@ -284,6 +337,9 @@ start_spinner "Installing phpmyadmin..."
 cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y phpmyadmin";
 _evalBg "${cmd}";
 
+
+
+# cloning froxlor git repo
 if [ -f /var/www/html/index.html ]; then
     rm /var/www/html/index.html
 fi
@@ -291,7 +347,11 @@ start_spinner "Setting up froxlor..."
 cmd="git clone https://github.com/Froxlor/Froxlor.git /var/www/html";
 _evalBg "${cmd}";
 
-cat <<EOF > /etc/cron.daily/update-froxlor
+
+
+if $dailyUpdateFroxlor ; then
+# adding new cronjob to update froxlor daily
+  cat <<EOF > /etc/cron.daily/update-froxlor
 #!/bin/bash
 git --git-dir='/var/www/html/.git' pull origin master
 RESULT=$?
@@ -308,13 +368,11 @@ else
   fi
 fi
 EOF
+fi
 
-#minute=shuf -i 0-59 -n 1
-#hour=shuf -i 0-23 -n 1
-#
-#cmd="crontab -l | { cat; echo "0 0 * * * some entry"; } | crontab";
-#_evalBg "${cmd}";
 
+
+# creating user and group for froxlor vhost user
 start_spinner "Creating group for froxlor web"
 cmd="groupadd -f froxlorlocal";
 _evalBg "${cmd}";
@@ -327,8 +385,10 @@ start_spinner "Setting user perms on froxlor web"
 cmd="chown -R froxlorlocal:froxlorlocal /var/www/html";
 _evalBg "${cmd}";
 
-#echo -e "Setup froxlor web \e[32msuccessfully\e[0m"
 
+
+### Enabling system quota ###
+# first install system quota components
 start_spinner "Installing system quota..."
 cmd="apt-get install -y quota quotatool";
 _evalBg "${cmd}";
@@ -365,6 +425,7 @@ if ! [ -f /proc/user_beancounters ]; then
         chmod 600 /aquota.group
       fi
       quotaon -aug
+      # if command above failed it is likely that this is a virtualized enviroment with journaled quota but we check that before
       elif [ "$(grep -i QFMT_V2 /boot/config-`uname -r`)" == "CONFIG_QFMT_V2=y" ] || [ "$(grep -i QFMT_V2 /boot/config-`uname -r`)" == "CONFIG_QFMT_V2=m" ]; then
         if quotacheck -F vfsv1 -acugm; then
           sed -i 's/errors=remount-ro,usrquota,grpquota/errors=remount-ro,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv1/g' /etc/fstab
@@ -376,6 +437,7 @@ if ! [ -f /proc/user_beancounters ]; then
           _evalBg "${cmd}"
           quotacheck -F vfsv1 -acugmf
           quotaon -F vfsv1 -aug
+          # maybe it is an older version of filesystem (probably oVZ)
           elif quotacheck -F vfsv0 -acugm; then
             sed -i 's/errors=remount-ro,usrquota,grpquota/errors=remount-ro,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv0/g' /etc/fstab
             sed -i 's/defaults,usrquota,grpquota/defaults,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv0/g' /etc/fstab
@@ -392,7 +454,7 @@ if ! [ -f /proc/user_beancounters ]; then
               chmod 600 /aquota.user
               chmod 600 /aquota.group
               quotaoff -af
-              # removing applied quota tags
+              # removing applied quota tags if activating quota is not possible
               sed -i 's/errors=remount-ro,usrquota,grpquota/errors=remount-ro/g' /etc/fstab
               sed -i 's/errors=remount-ro,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv1/errors=remount-ro/g' /etc/fstab
               sed -i 's/errors=remount-ro,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv0/errors=remount-ro/g' /etc/fstab
@@ -409,16 +471,17 @@ if ! [ -f /proc/user_beancounters ]; then
 fi
 
 
-#echo -e "Enabled quotas \e[32msuccessfully\e[0m"
+
 
 # download and install ioncube loaders to php
 start_spinner "Downloading ioncube loaders..."
 cmd="wget http://downloads3.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz";
 _evalBg "${cmd}";
-if ifDirExists "tmp-icl"; then
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+if ifDirExists "$DIR/tmp-icl"; then
   logError "ioncube loaders, directory already exists"
-  else
-  mkdir tmp-icl
+else
+  mkdir $DIR/tmp-icl
 fi
 start_spinner "Extracting ioncube loaders..."
 cmd="tar -C tmp-icl -xzf ioncube_loaders_lin_x86-64.tar.gz";
@@ -429,14 +492,20 @@ if ifDirExists "/usr/lib/php/20151012"; then
   else
   logError "ioncube loaders, php extention directory at wrong place"
 fi
+# creating conf for ioncube loaders in php
 touch "/etc/php/${PHPv}/fpm/conf.d/00-ioncube.ini"
 chmod 0777 "/etc/php/${PHPv}/fpm/conf.d/00-ioncube.ini"
 chown root:root "/etc/php/${PHPv}/fpm/conf.d/00-ioncube.ini"
 cat <<EOF > "/etc/php/${PHPv}/fpm/conf.d/00-ioncube.ini"
 zend_extension = "/usr/lib/php/20151012/ioncube_loader_lin_${PHPv}.so"
 EOF
+# remove everything we no longer need from ioncube loaders
 rm ioncube_loaders_lin_x86-64.tar.gz
 rm -R tmp-icl
+
+
+
+# restart webserver and php-fpm to reflect all current changes
 start_spinner "Disable mod php for apache2"
 cmd="a2dismod php$PHPv";
 _evalBg "${cmd}";
@@ -447,9 +516,9 @@ start_spinner "Restarting PHP fpm"
 cmd="systemctl restart php$PHPv-fpm";
 _evalBg "${cmd}";
 
-#echo -e "Added ioncubeloader \e[32msuccessfully\e[0m"
 
-# updating rkhunter database
+
+# updating rkhunter database as there is an issue with one version (Debian 9 default as time of initial release)
 if [ "$(rkhunter --version | grep "Rootkit Hunter 1.")" == "Rootkit Hunter 1.4.2" ]; then
   sed -i "s/UPDATE_MIRRORS=0/UPDATE_MIRRORS=1/g" /etc/rkhunter.conf
   sed -i "s/MIRRORS_MODE=1/MIRRORS_MODE=0/g" /etc/rkhunter.conf
@@ -461,7 +530,6 @@ _evalBg "${cmd}";
 start_spinner "Updating rootkit hunter..."
 cmd="rkhunter --update";
 _evalBg "${cmd}";
-
 # scan filesystem with rkhunter once to set these values als clean
 if $propupd ; then
   start_spinner "Setting file system to genuine in rkhunter..."
@@ -469,7 +537,7 @@ if $propupd ; then
   _evalBg "${cmd}";
 fi
 
-#echo -e "Installed rkhunter \e[32msuccessfully\e[0m"
+
 
 # setting up clamav
 mkdir /home/clamavinfected
@@ -478,6 +546,8 @@ cat <<EOF > /etc/cron.daily/clamd-froxlor
 clamscan --max-filesize=20000M --max-scansize=20000M --recursive --move=/home/clamavinfected --infected /home
 EOF
 sed -i 's/DatabaseMirror db.local.clamav.net/DatabaseMirror db.de.clamav.net/g' /etc/clamav/freshclam.conf
+
+
 
 # setting up extrausers according to froxlor config
 mkdir -p /var/lib/extrausers
@@ -515,6 +585,7 @@ cmd="systemctl restart nscd";
 _evalBg "${cmd}";
 nscd --invalidate=group
 
+
 # setting up bind9 according to froxlor config
 echo "include \"/etc/bind/froxlor_bind.conf\";" >> /etc/bind/named.conf.local
 touch /etc/bind/froxlor_bind.conf
@@ -524,13 +595,14 @@ start_spinner "Restarting nameserver..."
 cmd="systemctl restart bind9";
 _evalBg "${cmd}";
 
+
 # setting up apache2 according to froxlor config
 mkdir -p /var/customers/webs/
 mkdir -p /var/customers/logs/
 mkdir -p /var/customers/tmp
 chmod 1777 /var/customers/tmp
 a2dismod userdir
-
+# add Lets Encrypt cases
 cat <<EOF > /etc/apache2/conf-enabled/acme.conf
 Alias "/.well-known/acme-challenge" "/var/www/html/.well-known/acme-challenge"
 <Directory "/var/www/html/.well-known/acme-challenge">
@@ -540,6 +612,7 @@ EOF
 start_spinner "Restarting apache2"
 cmd="systemctl restart apache2";
 _evalBg "${cmd}";
+
 
 # setting up logrotate according to froxlor config
 cat <<EOF > /etc/logrotate.d/froxlor
@@ -563,14 +636,17 @@ EOF
 chmod 0644 "/etc/logrotate.d/froxlor"
 chown root:root "/etc/logrotate.d/froxlor"
 
+
 # setting up awstats according to froxlor config
 cp /usr/share/awstats/tools/awstats_buildstaticpages.pl /usr/bin/
-# mv /etc/awstats//awstats.conf /etc/awstats//awstats.model.conf
 ln -s /etc/awstats/awstats.conf /etc/awstats/awstats.model.conf
 sed -i.bak 's/^DirData/# DirData/' /etc/awstats//awstats.model.conf
 sed -i.bak 's|^\\(DirIcons=\\).*$|\\1\\"/awstats-icon\\"|' /etc/awstats//awstats.model.conf
 rm /etc/cron.d/awstats
 
+
+
+### pause installation process to let user continue in browser with froxlor web installer
 printf "\033c"
 echo ""
 echo -e "\e[92mFirst part of installation finished\e[0m"
@@ -592,10 +668,11 @@ echo -e "Keep this information at a save place. We do not save it for you!"
 echo ""
 echo ""
 echo -e "\e[33mOnce completed the web part of installation continue here..\e[0m"
-echo -e "\e[33mDo not try moving files from /tmp or similar as proposed by webinterface. We will do this for you. ;)\e[0m"
+echo -e "\e[91mDo not try moving files from /tmp or similar as proposed by webinterface.\e[33m We will do this for you. ;)\e[0m"
 echo "$(date "+%d.%m.%Y %T") : Finished Part 1/2" >> $LOGFILE 2>&1
 
 sleep 2
+
 
 # wait for user to finish web part of installation to let him continue then here
 echo -e "\e[94m------------------------\e[0m"
@@ -646,6 +723,8 @@ else
   done
 fi
 
+
+
 # setting up cron according to froxlor config
 cat <<EOF > /etc/cron.d/froxlor
 #
@@ -664,6 +743,7 @@ chown root:root "/etc/cron.d/froxlor"
 start_spinner "Restarting cron"
 cmd="systemctl restart cron";
 _evalBg "${cmd}";
+
 
 # setup login file
 froxlorrootName=
@@ -690,6 +770,8 @@ cat <<EOF > /var/www/html/lib/userdata.inc.php
 EOF
 chown froxlorlocal:froxlorlocal /var/www/html/lib/userdata.inc.php
 
+
+### Setting values in database for froxlor to enable there all component installed to this system
 # enable quota in froxlor
 mysql -u root -p$mdbpasswd $froxlordatabasename <<EOF
 UPDATE panel_settings SET value = '1' WHERE panel_settings.settingid = 144;
@@ -731,6 +813,7 @@ fi
 if [ -f /var/www/html/lib/userdata.inc.php ]; then
     php /var/www/html/scripts/froxlor_master_cronjob.php --force
 fi
+
 
 printf "\033c"
 echo ""
