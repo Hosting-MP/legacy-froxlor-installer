@@ -44,6 +44,7 @@ echo "$(date "+%d.%m.%Y %T") : Starting work" > $LOGFILE 2>&1
 
 # download spinner class which makes the installation process more visual
 wget -q -O spinner.sh https://raw.githubusercontent.com/tlatsas/bash-spinner/master/spinner.sh || echo -e "\e[31mFailed downloading \e[95manimation\e[31m resource!\e[0m" | exit 1
+source "spinner.sh"
 
 # download file with functions (better overview)
 wget -q -O froxlor-install-components.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/froxlor-install-components.bash || echo -e "\e[31mFailed downloading \e[95mcomponent\e[31m resource!\e[0m" | exit 1
@@ -86,8 +87,7 @@ loadResource() {
   source "$DIR/${1}.bash" || echo -e "\e[31mFailed loading resource!\e[0m" | exit 1
 }
 
-loadResource "spinner.sh"
-loadResource "froxlor-install-components.bash"
+loadResource "froxlor-install-components"
 loadResource "otherFunctions"
 
 
@@ -101,7 +101,7 @@ loadResource "otherFunctions"
 #---------------------------------------------------------------------
 # Collecting data and asking user
 #---------------------------------------------------------------------
-  loadResource "visualFrontend"
+  loadResource "basic/visualFrontend"
   ask 1
 
 
