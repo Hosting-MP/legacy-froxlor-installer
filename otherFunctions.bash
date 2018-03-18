@@ -84,7 +84,6 @@ calledScriptAsSupposed() {
 # Other functions
 #---------------------------------------------------------------------
 
-
 restartApache() {
   start_spinner "Restarting apache2"
   cmd="systemctl restart apache2";
@@ -126,14 +125,12 @@ ifDirExists() {
   fi
 }
 
-
 # append errors to the install log
 logError() {
   ERROR_msg=$1
   echo -e "\e[31mError during installation:\e[0m $ERROR_msg"
   echo "$(date "+%d.%m.%Y %T") : Error during installation: $ERROR_msg" >> $LOGFILE 2>&1
 }
-
 
 # check whether this is a virtual machine (tested for KVM/XEN but not yet for VMware and oVZ/LXC)
 isVM() {
