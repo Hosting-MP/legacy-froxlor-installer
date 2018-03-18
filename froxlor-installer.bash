@@ -112,7 +112,7 @@ loadResource "otherFunctions"
   # set hostname to previously asked value
   hostnamectl set-hostname $hostname
 
-  installComponent "system"
+  installComponent "basic/system"
 
   getPHPv
 
