@@ -15,7 +15,7 @@
 #---------------------------------------------------------------------
 # First make sure everything is compatible
 #---------------------------------------------------------------------
-  wget -q -O froxlor-install-components.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/otherFunctions.bash || echo -e "\e[31mFailed downloading \e[95minitial\e[31m resource!\e[0m" | exit 1
+  wget -q -O otherFunctions.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/otherFunctions.bash || echo -e "\e[31mFailed downloading \e[95minitial\e[31m resource!\e[0m" | exit 1
 
   runAsRoot
   isOSsupported
