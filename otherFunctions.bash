@@ -83,7 +83,6 @@ calledScriptAsSupposed() {
 #---------------------------------------------------------------------
 # Other functions
 #---------------------------------------------------------------------
-
 restartApache() {
   start_spinner "Restarting apache2"
   cmd="systemctl restart apache2";
