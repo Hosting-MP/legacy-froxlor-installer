@@ -108,6 +108,7 @@ getPHPv() {
   fi
 }
 
+
 # Check if a directory exists
 ifDirExists() {
   LINK_OR_DIR=$1
