@@ -40,13 +40,13 @@ isOSsupported() {
 
   if [ "`lsb_release -is`" = "Debian" ]; then
     DISTRO="Debian"
-	return 0
+    return 0
   elif [ "`lsb_release -is`" = "Ubuntu" ]; then
     DISTRO="Ubuntu"
-	return 0
+    return 0
   else
     echo "Unsupported Operating System";
-	exit 1
+    exit 1
   fi
 
 }
@@ -62,15 +62,15 @@ calledScriptAsSupposed() {
   if [ "$installMethodeChoice" = "" ] || [ -z $installMethodeChoice ]; then
     #nohup is default now
     installMethode="nohup"
-	return 0
+    return 0
   elif [ "$installMethodeChoice" = "disown" ]; then
     # installMethode="disown" not yet working
     echo -e "Switching to nohup as disown is not available yet"
     installMethode="nohup"
-	return 0
+    return 0
   elif [ "$installMethodeChoice" = "nohup" ]; then
     installMethode="nohup"
-	return 0
+    return 0
   else
     echo -e "\e[31mError executing command. Use:\e[0m"
     echo "$0 <disown|nohup>"
@@ -83,6 +83,7 @@ calledScriptAsSupposed() {
 #---------------------------------------------------------------------
 # Other functions
 #---------------------------------------------------------------------
+
 
 restartApache() {
   start_spinner "Restarting apache2"
@@ -125,12 +126,14 @@ ifDirExists() {
   fi
 }
 
+
 # append errors to the install log
 logError() {
   ERROR_msg=$1
   echo -e "\e[31mError during installation:\e[0m $ERROR_msg"
   echo "$(date "+%d.%m.%Y %T") : Error during installation: $ERROR_msg" >> $LOGFILE 2>&1
 }
+
 
 # check whether this is a virtual machine (tested for KVM/XEN but not yet for VMware and oVZ/LXC)
 isVM() {
