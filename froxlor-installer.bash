@@ -49,7 +49,7 @@ source "spinner.sh"
 # download file with functions (better overview)
 wget -q -O froxlor-install-components.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/froxlor-install-components.bash || echo -e "\e[31mFailed downloading \e[95mcomponent\e[31m resource!\e[0m" | exit 1
 mkdir $DIR/basic
-basicFiles="clamav database enableQuota ioncubeLoaders php-fpm phpmyadmin rkhunter system visualFrontend"
+basicFiles="clamav database quota ioncubeLoaders php-fpm phpmyadmin rkhunter system visualFrontend"
 for i in $basicFiles; do
   wget -q -O basic/$i.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/basic/$i.bash || echo -e "\e[31mFailed downloading resource \e[95m$i\e[31m!\e[0m" | exit 1
   wait
@@ -66,7 +66,7 @@ done
 mkdir $DIR/froxlorWeb
 froxlorWebFiles="awstats bind9 cron extrausers logrotate setupFroxlorGit userdataINC webserver webSql"
 for i in $froxlorWebFiles; do
-  wget -q -O basic/$i.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/basic/$i.bash || echo -e "\e[31mFailed downloading resource \e[95m$i\e[31m!\e[0m" | exit 1
+  wget -q -O basic/$i.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/froxlorWeb/$i.bash || echo -e "\e[31mFailed downloading resource \e[95m$i\e[31m!\e[0m" | exit 1
   wait
 done
 # wget -q -O froxlorWeb/awstats.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/froxlorWeb/awstats.bash
@@ -153,7 +153,7 @@ loadResource "otherFunctions"
 
 
   removeInstallerFiles
-  rm froxlor-install-components.sh
+  rm froxlor-install-components.bash
 
 
 #---------------------------------------------------------------------
