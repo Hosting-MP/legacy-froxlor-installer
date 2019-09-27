@@ -17,7 +17,7 @@ setupPHPfpm() {
   cmd="systemctl enable php$PHPv-fpm";
   _evalBg "${cmd}";
 
-  if [ $webserverChosen = "apache" ]; then
+  if [ "$webserverChosen" = "apache" ]; then
     start_spinner "Enable apache2 modules"
     cmd="a2enmod rewrite ssl http2 proxy_fcgi setenvif actions headers suexec";
     _evalBg "${cmd}";
@@ -35,7 +35,7 @@ setupPHPfpm() {
 
     restartApache
   fi
-  if [ $webserverChosen = "nginx" ]; then
+  if [ "$webserverChosen" = "nginx" ]; then
     sed -i 's!#location ~ \\.php$ {!location ~ \\.php$ { fastcgi_pass unix:/run/php/php'"$PHPv"'-fpm.sock; }!g' /etc/nginx/sites-enabled/default
 
     restartNginx
