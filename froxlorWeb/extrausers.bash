@@ -35,9 +35,11 @@ bootparams:     files
 
 netgroup:       nis
 EOF
-  start_spinner "Restarting nscd..."
-  cmd="systemctl restart nscd";
-  _evalBg "${cmd}";
-  nscd --invalidate=group
+  if command -v nscd 2>/dev/null; then
+    start_spinner "Restarting nscd..."
+    cmd="systemctl restart nscd";
+    _evalBg "${cmd}";
+    nscd --invalidate=group
+  fi
 
 }
