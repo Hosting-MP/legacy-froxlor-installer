@@ -89,9 +89,15 @@ restartApache() {
   _evalBg "${cmd}";
 }
 
+restartNginx() {
+  start_spinner "Restarting nginx"
+  cmd="systemctl restart nginx";
+  _evalBg "${cmd}";
+}
+
 getPHPv() {
   # https://gist.github.com/SpekkoRice/694e4e33ee298361b642
-  v="$(php -v|grep -m 1 --only-matching --perl-regexp "7\.\\d")"
+  v="$(php -v|grep -m 1 --only-matching --perl-regexp "7.\d")"
   # https://blog.ueffing.net/post/2012/06/19/php-version-mit-bash-herausfinden/
   v2="$(sLong=`php -v | grep PHP -m 1 | awk '{print $2}'`; echo ${sLong:0:3})"
 
