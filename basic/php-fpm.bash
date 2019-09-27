@@ -37,7 +37,7 @@ setupPHPfpm() {
   fi
   if [ "$webserverChosen" = "nginx" ]; then
     sed -i 's!#location ~ \\.php$ {!location ~ \\.php$ { fastcgi_pass unix:/run/php/php'"$PHPv"'-fpm.sock; }!g' /etc/nginx/sites-enabled/default
-
+    sed -i 's!index index.html index.htm index.nginx-debian.html;!index index.html index.htm index.php;!g' /etc/nginx/sites-enabled/default
     restartNginx
   fi
 
