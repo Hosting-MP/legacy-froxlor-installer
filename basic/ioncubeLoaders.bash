@@ -19,8 +19,8 @@ installICL() {
   cmd="tar -C tmp-icl -xzf ioncube_loaders_lin_x86-64.tar.gz";
   _evalBg "${cmd}";
   # how to get the php extension directory??
-  if ifDirExists "/usr/lib/php/20151012"; then
-    cp "tmp-icl/ioncube/ioncube_loader_lin_${PHPv}.so" "/usr/lib/php/20151012"
+  if ifDirExists "$PHPdir"; then
+    cp "tmp-icl/ioncube/ioncube_loader_lin_${PHPv}.so" "$PHPdir"
   else
     logError "ioncube loaders, php extention directory at wrong place"
   fi
@@ -30,7 +30,7 @@ installICL() {
   chmod 0777 "/etc/php/${PHPv}/fpm/conf.d/00-ioncube.ini"
   chown root:root "/etc/php/${PHPv}/fpm/conf.d/00-ioncube.ini"
   cat <<EOF > "/etc/php/${PHPv}/fpm/conf.d/00-ioncube.ini"
-zend_extension = "/usr/lib/php/20151012/ioncube_loader_lin_${PHPv}.so"
+zend_extension = "${PHPdir}/ioncube_loader_lin_${PHPv}.so"
 EOF
   # remove everything we no longer need from ioncube loaders
   rm ioncube_loaders_lin_x86-64.tar.gz
