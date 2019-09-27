@@ -10,15 +10,14 @@ setupSystem() {
   _evalBg "${cmd}";
   # waiting as it sometimes takes a second to apply changes on mirrorfile
   sleep 1
+  start_spinner "Installing sudo..."
+  cmd="DEBIAN_FRONTEND=noninteractive apt-get -y install sudo";
+  _evalBg "${cmd}";
   start_spinner "Updating packages..."
   cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade";
   _evalBg "${cmd}";
   start_spinner "Updating system..."
   cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade";
-  _evalBg "${cmd}";
-
-  start_spinner "Installing sudo..."
-  cmd="DEBIAN_FRONTEND=noninteractive apt-get -y install sudo";
   _evalBg "${cmd}";
 
 
