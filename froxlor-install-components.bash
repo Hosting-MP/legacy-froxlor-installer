@@ -48,27 +48,27 @@ installComponent() {
   if [ "$1" = "froxlorWeb/webserver" ]; then
     setupWebServer
   fi
-  
+
   if [ "$1" = "froxlorWeb/extrausers" ]; then
     setupExtraUsers
   fi
-  
+
   if [ "$1" = "froxlorWeb/bind9" ]; then
     setupBind9
   fi
-  
+
   if [ "$1" = "froxlorWeb/logrotate" ]; then
     setupLogrotate
   fi
-  
+
   if [ "$1" = "froxlorWeb/cron" ]; then
     setupCron
   fi
-  
+
   if [ "$1" = "froxlorWeb/awstats" ]; then
     setupAwstats
   fi
-  
+
   if [ "$1" = "froxlorWeb/userdataINC" ]; then
     setupUserdataINC
   fi
