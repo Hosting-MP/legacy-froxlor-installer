@@ -50,13 +50,20 @@ ask() {
       esac
     done
     echo -e "\e[94m------------------------\e[0m"
-    while true; do
-      read -p "Choose apache2 or nginx as webserver? [apache or nginx]" ws
-      ws=${ws:-apache}
-      case $yn in
-        [Apacheapache]* ) webserverChoice=apache; break;;
-        [Nginxnginx]* ) webserverChoice=nginx; break;;
-        * ) echo "Please answer apache or nginx.";;
+    WSSC='Which webserver should be installed? '
+    options=("apache" "nginx")
+    select opt in "${options[@]}"
+    do
+      case $opt in
+        "apache")
+            echo "Apache2 is going to be installed."
+			break
+            ;;
+        "nginx")
+            echo "nginx is going to be installed."
+			break
+            ;;
+        *) echo "invalid option $REPLY";;
       esac
     done
     echo -e "\e[94m------------------------\e[0m"
