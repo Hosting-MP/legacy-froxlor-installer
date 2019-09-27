@@ -82,26 +82,26 @@ setupQuota() {
           cmd="mount -o remount /"
           _evalBg "${cmd}";
         fi
-	  else
+      else
         # leave quota files ..just in case
         quotaoff -af
         # removing applied quota tags if activating quota is not possible
-		# w/ remount on error
+        # w/ remount on error
         sed -i 's/errors=remount-ro,usrquota,grpquota/errors=remount-ro/g' /etc/fstab
         sed -i 's/errors=remount-ro,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv1/errors=remount-ro/g' /etc/fstab
         sed -i 's/errors=remount-ro,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv0/errors=remount-ro/g' /etc/fstab
-		# w/ defauls
+        # w/ defauls
         sed -i 's/defaults,usrquota,grpquota/defaults/g' /etc/fstab
         sed -i 's/defaults,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv1/defaults/g' /etc/fstab
         sed -i 's/defaults,usrjquota=aquota.user,grpjquota=aquota.group,jqfmt=vfsv0/defaults/g' /etc/fstab
-		# reverted all changes so remount to have everything as before/default
+        # reverted all changes so remount to have everything as before/default
         echo -e "Enabling quotas \e[31mfailed\e[0m (already enabled?)"
         start_spinner "Remounting filesystem to disable quota"
         cmd="mount -o remount /"
         _evalBg "${cmd}";
       fi
-	else
-	  echo -e "It looks like quota is already installed so not modifying it"
+    else
+      echo -e "It looks like quota is already installed so not modifying it"
     fi
   fi
 
