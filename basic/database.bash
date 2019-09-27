@@ -5,13 +5,13 @@
 installDBServer() {
 
   # export DEBIAN_FRONTEND="noninteractive"
-  if [ $DISTRO = "Debian" ] && [ $DISTROv -eq "9" ]; then
+  if [[ $DISTRO = "Debian" ]] && [[ $DISTROv -eq "9" ]]; then
     debconf-set-selections <<< "mariadb-server mysql-server/root_password password $mdbpasswd"
     debconf-set-selections <<< "mariadb-server mysql-server/root_password_again password $mdbpasswd"
     start_spinner "Installing database server..."
     cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y mariadb-server";
     _evalBg "${cmd}";
-  elif [ $DISTRO = "Ubuntu" ] && [ $DISTROv -eq "16" ]; then
+  elif [[ $DISTRO = "Ubuntu" ]] && [[ $DISTROv -eq "16" ]]; then
     debconf-set-selections <<< "mysql-server mysql-server/root_password password $mdbpasswd"
     debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $mdbpasswd"
     start_spinner "Installing database server..."
