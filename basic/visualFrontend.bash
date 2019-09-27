@@ -47,6 +47,16 @@ ask() {
         * ) echo "Please answer yes or no.";;
       esac
     done
+	echo -e "\e[94m------------------------\e[0m"
+    while true; do
+      read -p "Choose apache2 or nginx as webserver? [apache or nginx]" ws
+      ws=${ws:-apache}
+      case $yn in
+        [Apacheapache]* ) webserverChoice=apache; break;;
+        [Nginxnginx]* ) webserverChoice=nginx; break;;
+        * ) echo "Please answer apache or nginx.";;
+      esac
+    done
     echo -e "\e[94m------------------------\e[0m"
     while true; do
       read -p "Create additional root user for froxlor and do not use system root (when no system root will be made froxlor compatible, not recommended)? [Yn]" fryn
