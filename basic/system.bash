@@ -20,8 +20,6 @@ setupSystem() {
   cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade";
   _evalBg "${cmd}";
 
-
-  start_spinner "Installing required components (takes a long time)..."
   # for now they are the same but Ubuntu is likely to be updated more recently
   INSTALL_PKGsDEBIAN="apt-utils debconf-utils clamav clamav-daemon \
                   dialog apache2-utils mcrypt curl bzip2 zip unzip tar wget git \
@@ -64,27 +62,33 @@ setupSystem() {
   fi
 
   if [[ $DISTRO = "Debian" ]]; then
+    start_spinner "Installing required components (takes a long time)..."
     cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $INSTALL_PKGsDEBIAN";
     _evalBg "${cmd}";
     if [[ $webserverChosen = "apache" ]]; then
+      start_spinner "Installing webserver specific packages (apache)"
       cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $INSTALL_PKGsDEBIAN_apache";
       _evalBg "${cmd}";
       return 0
     fi
     if [[ $webserverChosen = "nginx" ]]; then
+      start_spinner "Installing webserver specific packages (nginx)"
       cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $INSTALL_PKGsDEBIAN_nginx";
       _evalBg "${cmd}";
       return 0
     fi
   elif [[ $DISTRO = "Ubuntu" ]]; then
+    start_spinner "Installing required components (takes a long time)..."
     cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $INSTALL_PKGsUBUNTU";
     _evalBg "${cmd}";
     if [[ $webserverChosen = "apache" ]]; then
+      start_spinner "Installing webserver specific packages (apache)"
       cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $INSTALL_PKGsUBUNTU_apache";
       _evalBg "${cmd}";
       return 0
     fi
     if [[ $webserverChosen = "nginx" ]]; then
+      start_spinner "Installing webserver specific packages (nginx)"
       cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $INSTALL_PKGsUBUNTU_nginx";
       _evalBg "${cmd}";
       return 0
