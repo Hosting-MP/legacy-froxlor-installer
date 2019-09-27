@@ -19,15 +19,17 @@ ask() {
     echo ""
 
     # Asking for user data
-    echo -e "\e[94m------------------------\e[0m"
-    while [[ $mdbpasswd = "" ]]; do
-      read -sp 'Database root password: ' mdbpasswd
-      if [ -z $mdbpasswd ] ; then
-        echo $'\e[31mfailed\e[0m'
-      else
-        echo $'\e[32msuccess\e[0m'
-      fi
-    done
+    if ([ $DISTRO = "Debian" ] && [ $DISTROv = "9" ]) || ([ $DISTRO = "Ubuntu" ] && [ $DISTROv = "16" ]); then
+      echo -e "\e[94m------------------------\e[0m"
+      while [[ $mdbpasswd = "" ]]; do
+        read -sp 'Database root password: ' mdbpasswd
+        if [ -z $mdbpasswd ] ; then
+          echo $'\e[31mfailed\e[0m'
+        else
+          echo $'\e[32msuccess\e[0m'
+        fi
+      done
+    fi
     echo -e "\e[94m------------------------\e[0m"
     while [[ $hostname = "" ]]; do
       read -e -p 'Hostname: ' -i "$(hostname -f)" hostname
