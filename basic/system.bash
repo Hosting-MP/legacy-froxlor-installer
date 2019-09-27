@@ -44,7 +44,7 @@ setupSystem() {
   INSTALL_PKGsDEBIAN_nginx="nginx"
   INSTALL_PKGsUBUNTU_nginx="nginx"
 
-  if [ command -v apache2 2>/dev/null ] || [ command -v nginx 2>/dev/null ]; then
+  if [ ! command -v apache2 2>/dev/null ] || [ ! command -v nginx 2>/dev/null ]; then
     if [ "$webserverChoice" = "" ] || [ -z $webserverChoice ]; then
       webserverChosen="apache"
     elif [ "$webserverChoice" = "apache" ]; then
