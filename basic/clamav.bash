@@ -8,7 +8,7 @@ setupClamAV() {
   mkdir /home/clamavinfected
   cat <<EOF > /etc/cron.daily/clamd-froxlor
   #!/bin/bash
-clamscan --max-filesize=20000M --max-scansize=20000M --recursive --move=/home/clamavinfected --infected /var/customers
+clamscan --max-filesize=2G --max-scansize=2G --recursive --move=/home/clamavinfected --infected /var/customers
 EOF
   sed -i 's/DatabaseMirror db.local.clamav.net/DatabaseMirror db.de.clamav.net/g' /etc/clamav/freshclam.conf
 
