@@ -44,17 +44,16 @@ setupSystem() {
   INSTALL_PKGsDEBIAN_nginx="nginx"
   INSTALL_PKGsUBUNTU_nginx="nginx"
 
-  if [ "$webserverChoice" = "" ] || [ -z $webserverChoice ]; then
-    if [ ! command -v apache2 2>/dev/null ]; then
+  if [ command -v apache2 2>/dev/null ] || [ command -v nginx 2>/dev/null ]; then
+    if [ "$webserverChoice" = "" ] || [ -z $webserverChoice ]; then
       webserverChosen="apache"
-    fi
-  elif [ "$webserverChoice" = "apache" ]; then
-    if [ ! command -v apache2 2>/dev/null ]; then
+    elif [ "$webserverChoice" = "apache" ]; then
       webserverChosen="apache"
-    fi
-  elif [ "$webserverChoice" = "nginx" ]; then
-    if [ ! command -v nginx 2>/dev/null ]; then
+    elif [ "$webserverChoice" = "nginx" ]; then
       webserverChosen="nginx"
+    else
+      echo -e "\e[31mError: No valid webserver chosen.\e[0m"
+      exit 1
     fi
   else
     echo -e "\e[31mError choosing webserver. Maybe there is already an webserver installed.\e[0m"
