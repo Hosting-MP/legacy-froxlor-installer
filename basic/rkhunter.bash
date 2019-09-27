@@ -5,7 +5,7 @@
 setupRKHunter() {
 
   # updating rkhunter database as there is an issue with one version (Debian 9 default as time of initial release)
-  if [ "$(rkhunter --version | grep "Rootkit Hunter 1.")" == "Rootkit Hunter 1.4.2" ]; then
+  if [ "$(rkhunter --version | grep "Rootkit Hunter 1.")" == "Rootkit Hunter 1.4.2" ] || [ "$(rkhunter --version | grep "Rootkit Hunter 1.")" == "Rootkit Hunter 1.4.6" ]; then
     sed -i "s/UPDATE_MIRRORS=0/UPDATE_MIRRORS=1/g" /etc/rkhunter.conf
     sed -i "s/MIRRORS_MODE=1/MIRRORS_MODE=0/g" /etc/rkhunter.conf
     sed -i "s/WEB_CMD=\"\/bin\/false\"/WEB_CMD=\"\"/g" /etc/rkhunter.conf
