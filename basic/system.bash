@@ -46,20 +46,20 @@ setupSystem() {
 
   if [ "$webserverChoice" = "" ] || [ -z $webserverChoice ]; then
     #nohup is default now
-	if command -v apache2 2>/dev/null; then
-	  webserverChosen="apache"
-	  return 0
-	fi
+    if command -v apache2 2>/dev/null; then
+      webserverChosen="apache"
+      return 0
+    fi
   elif [ "$installMethodeChoice" = "apache" ]; then
-  	if command -v apache2 2>/dev/null; then
-	  webserverChosen="apache"
-	  return 0
-	fi
+    if command -v apache2 2>/dev/null; then
+      webserverChosen="apache"
+      return 0
+    fi
   elif [ "$installMethodeChoice" = "nginx" ]; then
-  	if command -v nginx 2>/dev/null; then
-	  webserverChosen="nginx"
-	  return 0
-	fi
+    if command -v nginx 2>/dev/null; then
+      webserverChosen="nginx"
+      return 0
+    fi
   else
     echo -e "\e[31mError choosing webserver.\e[0m"
     exit 1
@@ -68,25 +68,25 @@ setupSystem() {
   if [ $DISTRO = "Debian" ]; then
     cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $INSTALL_PKGsDEBIAN";
     _evalBg "${cmd}";
-	if [ $webserverChosen = "apache" ]; then
-	  cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $INSTALL_PKGsDEBIAN_apache";
-	  _evalBg "${cmd}";
-	fi
-	if [ $webserverChosen = "nginx" ]; then
-	  cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $INSTALL_PKGsDEBIAN_nginx";
-	  _evalBg "${cmd}";
-	fi
+    if [ $webserverChosen = "apache" ]; then
+      cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $INSTALL_PKGsDEBIAN_apache";
+      _evalBg "${cmd}";
+    fi
+    if [ $webserverChosen = "nginx" ]; then
+      cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $INSTALL_PKGsDEBIAN_nginx";
+      _evalBg "${cmd}";
+    fi
   elif [ $DISTRO = "Ubuntu" ]; then
     cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $INSTALL_PKGsUBUNTU";
     _evalBg "${cmd}";
-	if [ $webserverChosen = "apache" ]; then
-	  cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $INSTALL_PKGsUBUNTU_apache";
-	  _evalBg "${cmd}";
-	fi
-	if [ $webserverChosen = "nginx" ]; then
-	  cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $INSTALL_PKGsUBUNTU_nginx";
-	  _evalBg "${cmd}";
-	fi
+    if [ $webserverChosen = "apache" ]; then
+      cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $INSTALL_PKGsUBUNTU_apache";
+      _evalBg "${cmd}";
+    fi
+    if [ $webserverChosen = "nginx" ]; then
+      cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $INSTALL_PKGsUBUNTU_nginx";
+      _evalBg "${cmd}";
+    fi
   else
     echo "No methode for other OS than Debian/Ubuntu prepared yet"
   fi
