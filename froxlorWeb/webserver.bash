@@ -9,7 +9,6 @@ setupWebServer() {
   mkdir -p /var/customers/logs/
   mkdir -p /var/customers/tmp
   chmod 1777 /var/customers/tmp
-  a2dismod userdir
   # add Lets Encrypt cases
 cat <<EOF > /etc/apache2/conf-enabled/acme.conf
 Alias "/.well-known/acme-challenge" "/var/www/html/.well-known/acme-challenge"
