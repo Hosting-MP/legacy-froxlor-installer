@@ -30,7 +30,7 @@ setupPHPfpm() {
 
     # disable mod_php to use fpm from now on
     start_spinner "Disable mod php for apache2"
-    cmd="a2dismod php$PHPv";
+    cmd="a2dismod php$PHPv userdir";
     _evalBg "${cmd}";
 
     restartApache
