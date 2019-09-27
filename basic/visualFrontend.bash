@@ -56,7 +56,7 @@ ask() {
       case $ws in
         [Aa]* ) webserverChoice=apache; break;;
         [Nn]* ) webserverChoice=nginx; break;;
-        * ) echo "Please answer apache or nginx.";;
+        * ) echo "Please answer \e[1ma\e[0mpache or \e[1mn\e[0mginx.";;
       esac
     done
     echo -e "\e[94m------------------------\e[0m"
