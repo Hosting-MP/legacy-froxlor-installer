@@ -53,7 +53,7 @@ ask() {
     while true; do
       read -p "Choose apache2 or nginx as webserver? [An]" ws
       ws=${ws:-a}
-      case $yn in
+      case $ws in
         [Aa]* ) webserverChoice=apache; break;;
         [Nn]* ) webserverChoice=nginx; break;;
         * ) echo "Please answer apache or nginx.";;
