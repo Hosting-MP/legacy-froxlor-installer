@@ -64,25 +64,25 @@ setupSystem() {
     exit 1
   fi
 
-  if [ $DISTRO = "Debian" ]; then
+  if [[ $DISTRO = "Debian" ]]; then
     cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $INSTALL_PKGsDEBIAN";
     _evalBg "${cmd}";
-    if [ $webserverChosen = "apache" ]; then
+    if [[ $webserverChosen = "apache" ]]; then
       cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $INSTALL_PKGsDEBIAN_apache";
       _evalBg "${cmd}";
     fi
-    if [ $webserverChosen = "nginx" ]; then
+    if [[ $webserverChosen = "nginx" ]]; then
       cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $INSTALL_PKGsDEBIAN_nginx";
       _evalBg "${cmd}";
     fi
-  elif [ $DISTRO = "Ubuntu" ]; then
+  elif [[ $DISTRO = "Ubuntu" ]]; then
     cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $INSTALL_PKGsUBUNTU";
     _evalBg "${cmd}";
-    if [ $webserverChosen = "apache" ]; then
+    if [[ $webserverChosen = "apache" ]]; then
       cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $INSTALL_PKGsUBUNTU_apache";
       _evalBg "${cmd}";
     fi
-    if [ $webserverChosen = "nginx" ]; then
+    if [[ $webserverChosen = "nginx" ]]; then
       cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $INSTALL_PKGsUBUNTU_nginx";
       _evalBg "${cmd}";
     fi
