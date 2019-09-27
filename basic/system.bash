@@ -29,7 +29,7 @@ setupSystem() {
                   php-memcached php-mysql php-pdo php-pdo-mysql php-sqlite3 sqlite3 \
                   php-pspell spell aspell-de php-phar php-posix php-pear php-tidy tidy \
                   php-yaml php-zip php-intl php-memcache php-xmlrpc rkhunter certbot \
-                  nscd libnss-extrausers bind9 logrotate awstats vim composer"
+                  libnss-extrausers bind9 logrotate awstats vim composer"
   INSTALL_PKGsUBUNTU="apt-utils debconf-utils clamav clamav-daemon \
                   dialog apache2-utils mcrypt curl bzip2 zip unzip tar wget git \
                   php php-fpm php-json php-gd php-imagick imagemagick php-curl php-mcrypt \
@@ -38,7 +38,7 @@ setupSystem() {
                   php-memcached php-mysql php-pdo php-pdo-mysql php-sqlite3 sqlite3 \
                   php-pspell spell aspell-de php-phar php-posix php-pear php-tidy tidy \
                   php-yaml php-zip php-intl php-memcache php-xmlrpc rkhunter certbot \
-                  nscd libnss-extrausers bind9 logrotate awstats vim composer"
+                  libnss-extrausers bind9 logrotate awstats vim composer"
   INSTALL_PKGsDEBIAN_apache="apache2 apache2-suexec-pristine php-uploadprogress"
   INSTALL_PKGsUBUNTU_apache=" apache2 apache2-suexec-pristine php-uploadprogress"
   INSTALL_PKGsDEBIAN_nginx="nginx"
@@ -61,7 +61,7 @@ setupSystem() {
       return 0
     fi
   else
-    echo -e "\e[31mError choosing webserver.\e[0m"
+    echo -e "\e[31mError choosing webserver. Maybe there is already an webserver installed.\e[0m"
     exit 1
   fi
 
