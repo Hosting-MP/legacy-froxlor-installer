@@ -4,7 +4,7 @@
 #---------------------------------------------------------------------
 installPHPmyAdmin() {
 
-  if ([ $DISTRO = "Debian" ] && [ $DISTROv -eq "9" ]) || ([ $DISTRO = "Ubuntu" ] && [ $DISTROv -eq "16" ]); then
+  if ([ $DISTRO = "Debian" ] && [ $DISTROv = "9" ]) || ([ $DISTRO = "Ubuntu" ] && [ $DISTROv = "16" ]); then
     echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2" | debconf-set-selections
     echo "phpmyadmin phpmyadmin/dbconfig-install boolean false" | debconf-set-selections
     echo "phpmyadmin phpmyadmin/dbconfig-upgrade boolean false" | debconf-set-selections
