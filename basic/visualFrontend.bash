@@ -47,7 +47,7 @@ ask() {
         * ) echo "Please answer yes or no.";;
       esac
     done
-	echo -e "\e[94m------------------------\e[0m"
+    echo -e "\e[94m------------------------\e[0m"
     while true; do
       read -p "Choose apache2 or nginx as webserver? [apache or nginx]" ws
       ws=${ws:-apache}
