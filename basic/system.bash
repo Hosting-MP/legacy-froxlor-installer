@@ -17,6 +17,9 @@ setupSystem() {
   cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade";
   _evalBg "${cmd}";
 
+  start_spinner "Installing sudo..."
+  cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get -y install sudo";
+  _evalBg "${cmd}";
 
 
   start_spinner "Installing required components (takes a long time)..."
