@@ -54,30 +54,13 @@ for i in $basicFiles; do
   wget -q -O basic/$i.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/basic/$i.bash || echo -e "\e[31mFailed downloading resource \e[95m$i\e[31m!\e[0m" | exit 1
   wait
 done
-# wget -q -O basic/clamav.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/basic/clamav.bash
-# wget -q -O basic/database.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/basic/database.bash
-# wget -q -O basic/quota.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/basic/quota.bash
-# wget -q -O basic/ioncubeLoaders.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/basic/ioncubeLoaders.bash
-# wget -q -O basic/php-fpm.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/basic/php-fpm.bash
-# wget -q -O basic/phpmyadmin.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/basic/phpmyadmin.bash
-# wget -q -O basic/rkhunter.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/basic/rkhunter.bash
-# wget -q -O basic/system.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/basic/system.bash
-# wget -q -O basic/visualFrontend.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/basic/visualFrontend.bash
+
 mkdir $DIR/froxlorWeb
 froxlorWebFiles="awstats bind9 cron extrausers logrotate setupFroxlorGit userdataINC webserver webSql"
 for i in $froxlorWebFiles; do
-  wget -q -O basic/$i.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/froxlorWeb/$i.bash || echo -e "\e[31mFailed downloading resource \e[95m$i\e[31m!\e[0m" | exit 1
+  wget -q -O froxlorWeb/$i.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/froxlorWeb/$i.bash || echo -e "\e[31mFailed downloading resource \e[95m$i\e[31m!\e[0m" | exit 1
   wait
 done
-# wget -q -O froxlorWeb/awstats.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/froxlorWeb/awstats.bash
-# wget -q -O froxlorWeb/bind9.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/froxlorWeb/bind9.bash
-# wget -q -O froxlorWeb/cron.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/froxlorWeb/cron.bash
-# wget -q -O froxlorWeb/extrausers.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/froxlorWeb/extrausers.bash
-# wget -q -O froxlorWeb/logrotate.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/froxlorWeb/logrotate.bash
-# wget -q -O froxlorWeb/setupFroxlorGit.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/froxlorWeb/setupFroxlorGit.bash
-# wget -q -O froxlorWeb/userdataINC.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/froxlorWeb/userdataINC.bash
-# wget -q -O froxlorWeb/webserver.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/froxlorWeb/webserver.bash
-# wget -q -O froxlorWeb/webSql.bash https://raw.githubusercontent.com/Hosting-MP/froxlor-installer/master/froxlorWeb/webSql.bash
 
 
 #---------------------------------------------------------------------
