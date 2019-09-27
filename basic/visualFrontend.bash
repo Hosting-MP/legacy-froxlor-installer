@@ -19,7 +19,7 @@ ask() {
     echo ""
 
     # Asking for user data
-    if ([ $DISTRO = "Debian" ] && [ $DISTROv = "9" ]) || ([ $DISTRO = "Ubuntu" ] && [ $DISTROv = "16" ]); then
+    if ([[ $DISTRO = "Debian" ]] && [[ $DISTROv = "9" ]]) || ([[ $DISTRO = "Ubuntu" ]] && [[ $DISTROv = "16" ]]); then
       echo -e "\e[94m------------------------\e[0m"
       while [[ $mdbpasswd = "" ]]; do
         read -sp 'Database root password: ' mdbpasswd
