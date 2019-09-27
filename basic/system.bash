@@ -26,8 +26,8 @@ setupSystem() {
   # for now they are the same but Ubuntu is likely to be updated more recently
   INSTALL_PKGsDEBIAN="apt-utils debconf-utils clamav clamav-daemon \
                   dialog apache2-utils mcrypt curl bzip2 zip unzip tar wget git \
-                  php php-fpm php-json php-gd php-imagick imagemagick php-curl php-mcrypt \
-                  php-xsl php-fileinfo php-geoip geoip-database-contrib \
+                  php php-fpm php-json php-gd php-imagick imagemagick php-curl \
+                  php-xsl php-fileinfo php-geoip geoip-database \
                   php-apcu php-bcmath php-dom php-gnupg php-imap php-mailparse php-mbstring \
                   php-memcached php-mysql php-pdo php-pdo-mysql php-sqlite3 sqlite3 \
                   php-pspell spell aspell-de php-phar php-posix php-pear php-tidy tidy \
