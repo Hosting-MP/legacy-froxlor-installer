@@ -28,7 +28,7 @@ setupDBServer() {
   if $createFroxlorRootPassword ; then
     # Generate froxlorroot password
     froxlorrootpassword="$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-24};echo;)"
-    if [ $DISTROv -eq "9" ] || [ $DISTROv -eq "16" ]; then
+    if [ ! $mdbpasswd = "" ]; then
       mysql -u root -p$mdbpasswd <<EOF
 CREATE USER 'froxlorroot'@'localhost' IDENTIFIED BY '$froxlorrootpassword';
 GRANT ALL PRIVILEGES ON * . * TO 'froxlorroot'@'localhost' WITH GRANT OPTION;
