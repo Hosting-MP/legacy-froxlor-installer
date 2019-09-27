@@ -115,6 +115,7 @@ loadResource "otherFunctions"
   installComponent "basic/system"
 
   getPHPv
+  getPHPdir
 
   installComponent "basic/php-fpm"
   installComponent "basic/database"
