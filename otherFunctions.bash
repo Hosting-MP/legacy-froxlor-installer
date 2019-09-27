@@ -49,6 +49,16 @@ isOSsupported() {
     exit 1
   fi
 
+  if [[ "`lsb_release -r | grep -oP "[0-9]+" | head -1`" == *"9"* ]]; then
+    DISTROv="9"
+    return 0
+  elif [[ "`lsb_release -r | grep -oP "[0-9]+" | head -1`" == *"16"* ]]; then
+    DISTROv="16"
+    return 0
+  else
+    DISTROv="999"
+  fi
+
 }
 
 
@@ -108,6 +118,16 @@ getPHPv() {
     PHPv=$v2;
   else
     echo "\e[31mFailed\e[0m to fetch php, not installed?"
+    exit 1
+  fi
+}
+
+getPHPdir() {
+  d="$(find /usr/lib/php -name "20*" -type d)"
+  if [ ! $d == "" ]; then
+    PHPdir=$d;
+  else
+    echo "\e[31mFailed\e[0m to find php-mod directory, custom installation?"
     exit 1
   fi
 }
