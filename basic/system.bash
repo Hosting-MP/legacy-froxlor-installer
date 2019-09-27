@@ -18,7 +18,7 @@ setupSystem() {
   _evalBg "${cmd}";
 
   start_spinner "Installing sudo..."
-  cmd="sudo DEBIAN_FRONTEND=noninteractive apt-get -y install sudo";
+  cmd="DEBIAN_FRONTEND=noninteractive apt-get -y install sudo";
   _evalBg "${cmd}";
 
 
