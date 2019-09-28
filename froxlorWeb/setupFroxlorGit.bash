@@ -5,7 +5,7 @@
 installFroxlorWeb() {
 
   # cloning froxlor git repo
-  if [ -f /var/www/html/index.html ]; then
+  if [ -f /var/www/html/index*.html ]; then
       rm /var/www/html/index*.html
   fi
   start_spinner "Setting up froxlor..."
