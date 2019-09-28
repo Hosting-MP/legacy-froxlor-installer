@@ -97,11 +97,11 @@ ask() {
     if $createFroxlorRootPassword; then
       echo ""
       echo ""
-      froxlorunprivilegedpasswd="$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-16};echo;)"
+      froxlorunprivilegedpasswd=$(genRandomPasswd 16)
 	  sleep 1
       echo -e "Froxlor-Password (unprivileged): $froxlorunprivilegedpasswd"
       echo -e "FroxlorRoot: User=\e[1mfroxlorroot\e[0m Password=\e[1m$froxlorrootpassword\e[0m"
-      echo -e "Froxlor-Admin-Password: $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-12};echo;)"
+      echo -e "Froxlor-Admin-Password: $(genRandomPasswd 12)"
 	  sleep 1
       echo -e "Copy these to the web browser installation process. \e[5mFroxlorRoot-Password is mandatory and case-sensitive!\e[0m"
     fi
