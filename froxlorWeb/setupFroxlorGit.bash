@@ -48,4 +48,8 @@ EOF
   cmd="chown -R froxlorlocal:froxlorlocal /var/www/html";
   _evalBg "${cmd}";
 
+  start_spinner "Running composer"
+  cmd="composer install -d /var/www/html --no-dev";
+  _evalBg "${cmd}";
+
 }
