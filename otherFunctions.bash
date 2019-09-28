@@ -91,7 +91,7 @@ calledScriptAsSupposed() {
 
 
 #---------------------------------------------------------------------
-# Other functions
+# Webserver functions
 #---------------------------------------------------------------------
 restartApache() {
   start_spinner "Restarting apache2"
@@ -133,6 +133,10 @@ getPHPdir() {
 }
 
 
+#---------------------------------------------------------------------
+# Other functions
+#---------------------------------------------------------------------
+
 # Check if a directory exists
 ifDirExists() {
   LINK_OR_DIR=$1
@@ -149,6 +153,12 @@ ifDirExists() {
     else
     return 1
   fi
+}
+
+genRandomPasswd() {
+  lenght=$1
+  echo "$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-$lenght};echo;)"
+  return 0
 }
 
 
