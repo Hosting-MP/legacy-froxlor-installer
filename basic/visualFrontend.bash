@@ -98,9 +98,11 @@ ask() {
       echo ""
       echo ""
       froxlorunprivilegedpasswd="$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-16};echo;)"
+	  sleep 1
       echo -e "Froxlor-Password (unprivileged): $froxlorunprivilegedpasswd"
       echo -e "FroxlorRoot: User=\e[1mfroxlorroot\e[0m Password=\e[1m$froxlorrootpassword\e[0m"
       echo -e "Froxlor-Admin-Password: $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-12};echo;)"
+	  sleep 1
       echo -e "Copy these to the web browser installation process. \e[5mFroxlorRoot-Password is mandatory and case-sensitive!\e[0m"
     fi
     echo ""
@@ -149,7 +151,7 @@ ask() {
       done
     fi
     froxlorUnprivilegedPassword=
-    if [ ! -z $useFroxlorUnprivilegedPasswd ]; then
+    if [ "$useFroxlorUnprivilegedPasswd" = true ]; then
       froxlorUnprivilegedPassword=$froxlorunprivilegedpasswd
     else
       echo -e "\e[94m------------------------\e[0m"
