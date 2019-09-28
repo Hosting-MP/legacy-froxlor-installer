@@ -97,7 +97,7 @@ ask() {
     if $createFroxlorRootPassword; then
       echo ""
       echo ""
-      froxlorunprivilegedpasswd=$(genRandomPasswd 16)
+      froxlorunprivilegedpasswd="$(genRandomPasswd 16)"
 	  sleep 1
       echo -e "Froxlor-Password (unprivileged): $froxlorunprivilegedpasswd"
       echo -e "FroxlorRoot: User=\e[1mfroxlorroot\e[0m Password=\e[1m$froxlorrootpassword\e[0m"
