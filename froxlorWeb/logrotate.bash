@@ -42,6 +42,7 @@ elif [[ "$webserverChoice" = "nginx" ]]; then
   /etc/init.d/nginx reload > /dev/null 2>&1 || true
   endscript
 }
+EOF
 fi
 
   chmod 0644 "/etc/logrotate.d/froxlor"
