@@ -33,7 +33,8 @@ netmasks:       files
 netgroup:       files
 bootparams:     files
 
-netgroup:       nis
+automount:      files
+aliases:        files
 EOF
   if command -v nscd 2>/dev/null; then
     start_spinner "Restarting nscd..."
