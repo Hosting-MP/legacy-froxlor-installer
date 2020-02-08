@@ -49,11 +49,11 @@ isOSsupported() {
     exit 1
   fi
 
-  if [[ "`lsb_release -r | grep -oP "[0-9]+" | head -1`" == *"9"* ]]; then
-    DISTROv="9"
+  if [[ "`lsb_release -r | grep -oP "[0-9]+" | head -1`" == *"10"* ]]; then
+    DISTROv="10"
     return 0
-  elif [[ "`lsb_release -r | grep -oP "[0-9]+" | head -1`" == *"16"* ]]; then
-    DISTROv="16"
+  elif [[ "`lsb_release -r | grep -oP "[0-9]+" | head -1`" == *"18"* ]]; then
+    DISTROv="18"
     return 0
   else
     DISTROv="999"
