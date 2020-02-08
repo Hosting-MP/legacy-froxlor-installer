@@ -5,14 +5,15 @@
 setupLogrotate() {
 
   # setting up logrotate according to froxlor config
-  cat <<EOF > /etc/logrotate.d/froxlor
+  if [[ "$webserverChoice" = "apache" ]]; then
+    cat <<EOF > /etc/logrotate.d/froxlor
 #
 # Froxlor logrotate snipet
 #
 /var/customers/logs/*.log {
   missingok
-  weekly
-  rotate 4
+  daily
+  rotate 7
   compress
   delaycompress
   notifempty
@@ -23,6 +24,26 @@ setupLogrotate() {
   endscript
 }
 EOF
+elif [[ "$webserverChoice" = "nginx" ]]; then
+  cat <<EOF > /etc/logrotate.d/froxlor
+#
+# Froxlor logrotate snipet
+#
+/var/customers/logs/*.log {
+  missingok
+  daily
+  rotate 7
+  compress
+  delaycompress
+  notifempty
+  create
+  sharedscripts
+  postrotate
+  /etc/init.d/nginx reload > /dev/null 2>&1 || true
+  endscript
+}
+fi
+
   chmod 0644 "/etc/logrotate.d/froxlor"
   chown root:root "/etc/logrotate.d/froxlor"
 
