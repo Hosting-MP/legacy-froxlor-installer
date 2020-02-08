@@ -97,6 +97,19 @@ calledScriptAsSupposed() {
 
 
 #---------------------------------------------------------------------
+# Checking if software has been preinstalled
+#---------------------------------------------------------------------
+checkWebServerInstalled() {
+  if ! [ -x "$(command -v apache2)" ] || ! [ -x "$(command -v nginx)" ]; then
+    return 0
+  else
+    echo -e "\e[31mError choosing webserver. Maybe there is already an webserver installed.\e[0m"
+    exit 1
+  fi
+}
+
+
+#---------------------------------------------------------------------
 # Webserver functions
 #---------------------------------------------------------------------
 restartApache() {
