@@ -55,6 +55,12 @@ isOSsupported() {
   elif [[ "`lsb_release -r | grep -oP "[0-9]+" | head -1`" == *"18"* ]]; then
     DISTROv="18"
     return 0
+  elif [[ "`lsb_release -r | grep -oP "[0-9]+" | head -1`" == *"9"* ]]; then
+    DISTROv="9"
+    return 0
+  elif [[ "`lsb_release -r | grep -oP "[0-9]+" | head -1`" == *"16"* ]]; then
+    DISTROv="16"
+    return 0
   else
     DISTROv="999"
   fi
