@@ -11,7 +11,7 @@ setupWebServer() {
   chmod 1777 /var/customers/tmp
 
 
-  if [ "$webserverChosen" = "apache" ]; then
+  if [[ "$webserverChoice" = "apache" ]]; then
     # add Lets Encrypt cases
     cat <<EOF > /etc/apache2/conf-enabled/acme.conf
 Alias "/.well-known/acme-challenge" "/var/www/html/.well-known/acme-challenge"
@@ -22,7 +22,7 @@ EOF
 
     restartApache
   fi
-  if [ "$webserverChosen" = "nginx" ]; then
+  if [[ "$webserverChoice" = "nginx" ]]; then
   cat <<EOF > /etc/nginx/acme.conf
 location /.well-known/acme-challenge {
     alias /var/www/html/.well-known/acme-challenge;
