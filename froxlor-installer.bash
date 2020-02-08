@@ -22,6 +22,8 @@
   isOSsupported
   calledScriptAsSupposed
 
+  checkWebServerInstalled
+
 
 #---------------------------------------------------------------------
 # Global variables
