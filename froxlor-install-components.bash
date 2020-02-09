@@ -83,4 +83,5 @@ removeInstallerFiles() {
   rm spinner.sh
   rm -R $DIR/basic
   rm -R $DIR/froxlorWeb
+  rm otherFunctions.bash
 }
